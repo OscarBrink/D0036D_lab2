@@ -10,19 +10,27 @@ public class Model {
     
     public SAXParser saxParser;
     public Handler dh;
+    private File file;       
 
     public Model() {
         try {
+            String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
+            this.file = new File(fPath);
             this.saxParser = factory.newSAXParser();
             this.dh = new Handler();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public void getWeatherData(String locationName) {
+        this.dh.setParameter(locationName);
+        this.parse();
+    }
     
-    public void parse(File f) {
+    private void parse() {
         try {
-            this.saxParser.parse(f, this.dh);
+            this.saxParser.parse(this.file, this.dh);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -33,14 +41,12 @@ public class Model {
 
 class Main {
     public static void main(String[] args) {
-
-        String fPath = "/nfs/students/oscbri-7/d0036d/lab2/testfiles/places.xml";
-        
-        System.out.println("fPath: " + fPath);
+        //System.out.println("fPath: " + fPath);
         Model model = new Model();
         
-        File f = new File(fPath);
-        
-        model.parse(f);
+        String locationName = "Skelleftea";
+
+        model.getWeatherData(locationName);
     }
 }
+
