@@ -4,6 +4,9 @@ import javax.xml.parsers.*;
 import org.xml.sax.*;
 import java.io.File;
 
+// UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
+// WIN  : String fPath = System.getProperty("user.dir") + "\\testfiles\\places.xml";
+
 public class Model {
     
     static SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -14,7 +17,8 @@ public class Model {
 
     public Model() {
         try {
-            String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
+            String sep = File.separator;
+            String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
             this.file = new File(fPath);
             this.saxParser = factory.newSAXParser();
             this.dh = new Handler();

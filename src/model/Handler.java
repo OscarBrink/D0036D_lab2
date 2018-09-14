@@ -23,15 +23,12 @@ public class Handler extends DefaultHandler {
         String infoStr = "";
         if (nxtElem) {
             for (int i = 0; i < attributes.getLength(); i++) { 
-                infoStr += " " + attributes.getQName(i) + " " + attributes.getValue(i);
+                infoStr += attributes.getQName(i) + " " + attributes.getValue(i) + " ";
             }
             System.out.println(infoStr);
         }
-        nxtElem = attributes.getValue(0) == this.parameterName;
-        System.out.print(attributes.getValue(0) == this.parameterName);
-        System.out.println(attributes.getValue(0) + " " + this.parameterName
-                + " " + Boolean.toString(nxtElem)
-        );
+
+        nxtElem = this.parameterName.equals(attributes.getValue(0));
     }
 }
 
