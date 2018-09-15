@@ -2,6 +2,8 @@ package model;
 
 import javax.xml.parsers.*;
 
+import javafx.util.Pair;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -16,30 +18,37 @@ public class Model {
 
     public SAXParser saxParser;
     public PlacesHandler placesHandler;
-    private File file;
+    private File placesFile;
 
 
     public Model() throws ParserConfigurationException, SAXException, IOException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
-        this.file = new File(fPath);
+        this.placesFile = new File(fPath);
 
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
     }
 
-    public void getWeatherData(String locationName) {
-        this.placesHandler.setPlaceName(locationName);
-        this.parse();
+    public void getWeatherData(String placeName) {
+        this.getPlaceData(placeName);
     }
-    
-    private void parse() {
+
+    /*
+     * This structure might appear weird, since data is retrieved through the
+     * catch clause. This is to avoid
+     */
+    private Pair[] getPlaceData(String placeName) {
+        this.placesHandler.setPlaceName(placeName);
         try {
-            this.saxParser.parse(this.file, this.placesHandler);
-        } catch (SAXException ignored) {
-        } catch (IOException e) {
+            this.saxParser.parse(this.placesFile, this.placesHandler);
+        } catch (XMLDataRetrievedException dataRetriever) {
+            return dataRetriever.getData();
+        } catch (SAXException | IOException e) {
+            // TODO auto exception
             e.printStackTrace();
         }
+        throw new ;
     }
 
 }
@@ -55,12 +64,12 @@ class Main {
             e.printStackTrace();
         }
 
-        String locationName = "Kage";
+        String placeName = "Skelleftea";
 
-        String infoStr = "Getting data for " + locationName;
+        String infoStr = "Getting data for " + placeName;
         System.out.println(infoStr);
 
 
-        model.getWeatherData(locationName);
+        model.getWeatherData(placeName);
     }
 }
