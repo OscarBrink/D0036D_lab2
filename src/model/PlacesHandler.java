@@ -54,10 +54,4 @@ public class PlacesHandler extends DefaultHandler {
     void setPlaceName(String parameterName) {
         this.placeName = parameterName;
     }
-
-    private class PlaceDataException extends SAXException {
-        PlaceDataException(String message) {
-            super(message);
-        }
-    }
 }

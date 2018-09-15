@@ -20,9 +20,7 @@ class XMLDataRetrievedException extends RuntimeException {
         // Testing
         System.out.println("In Exc: ");
         for (Pair<String, String> p : data) {
-            System.out.println(p.getKey() +
-                    " " + p.getValue()
-            );
+            System.out.println(p.getKey() + " " + p.getValue());
         }
     }
 

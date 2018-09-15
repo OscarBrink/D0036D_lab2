@@ -62,7 +62,8 @@ public class Model {
         throw new SAXException();
     }
 
-    private void checkPlaceData(Pair<String, String>[] data) {
+    private void checkPlaceData(Pair<String, String>[] data)
+            throws PlaceDataException {
         for (Pair<String, String> p: data) {
             if (p.getKey().equals("altitude")
                     || p.getKey().equals("latitude")
@@ -70,10 +71,13 @@ public class Model {
                 try {
                     Float.valueOf(p.getValue());
                 } catch (NumberFormatException e) {
-
+                    String message = "Value of " + p.getKey() + " is NaN.";
+                    throw new PlaceDataException(message);
                 }
             } else {
-                throw
+                String message = "Unknown parameter name \"" +
+                        p.getKey() + "\".";
+                throw new PlaceDataException(message);
             }
         }
     }
