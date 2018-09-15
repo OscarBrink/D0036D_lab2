@@ -13,6 +13,11 @@ class XMLDataRetrievedException extends RuntimeException {
 
     private Pair<String, String>[] data;
 
+    /**
+     * Constructor.
+     *
+     * @param data Key-value pair from .xml-files (attribute - value pair).
+     */
     XMLDataRetrievedException(Pair<String, String>[] data) {
         super();
         this.data = data;
@@ -24,7 +29,11 @@ class XMLDataRetrievedException extends RuntimeException {
         }
     }
 
+    /**
+     *
+     * @return data retrieved from .xml-file
+     */
     Pair<String, String>[] getData() {
-        return data;
+        return this.data;
     }
 }

@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 
+// Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
 // WIN  : String fPath = System.getProperty("user.dir") + "\\testfiles\\places.xml";
 
@@ -45,7 +46,8 @@ public class Model {
 
     /*
      * This structure might appear weird, since data is retrieved through the
-     * catch clause. This is to avoid
+     * catch clause. This is to avoid parsing the entire XML-file after the
+     * desired data has been retrieved. See PlacesHandler.java for impl.
      */
     private Pair<String, String>[] getPlaceData(String placeName) throws SAXException {
         this.placesHandler.setPlaceName(placeName);

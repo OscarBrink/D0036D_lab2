@@ -2,7 +2,6 @@ package model;
 
 import javafx.util.Pair;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
@@ -51,7 +50,7 @@ public class PlacesHandler extends DefaultHandler {
         this.placeNameFound = false;
     }
 
-    void setPlaceName(String parameterName) {
-        this.placeName = parameterName;
+    void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
 }
