@@ -32,12 +32,16 @@ public class PlacesHandler extends DefaultHandler {
             for (int i = 0; i < 3; i++) {
                 placeData[i] = new Pair<>(attributes.getQName(i), attributes.getValue(i));
             }
-            this.resetState();
-            throw new XMLDataRetrievedException(placeData);
+            this.endParse();
 
         } else {
             placeNameFound = this.placeName.equals(attributes.getValue("name"));
         }
+    }
+
+    private void endParse() {
+        this.resetState();
+        throw new XMLDataRetrievedException(this.placeData);
     }
 
     private void incorrectDataError() throws PlaceDataException {

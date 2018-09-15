@@ -40,14 +40,19 @@ public class Model {
         this.weatherHandler = new WeatherHandler();
     }
 
-    public void getWeatherData(String placeName) {
+    public Pair<String, String> getWeatherData(String placeName) throws SAXException {
+        this.getPlaceData(placeName);
+        this.weatherHandler.setlookupTime("21:00:00");
+
         try {
-            this.getPlaceData(placeName);
-            this.weatherHandler.setlookupTime("23:59:59");
             this.saxParser.parse(this.weatherFile, this.weatherHandler);
-        } catch (SAXException | IOException e) {
+        } catch (XMLDataRetrievedException dataRetriever) {
+            Pair<String, String> data = dataRetriever.getData();
+            return data;
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        throw new SAXException();
     }
 
     /*
@@ -60,7 +65,7 @@ public class Model {
         try {
             this.saxParser.parse(this.placesFile, this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
-            Pair<String, String>[] data = dataRetriever.getData();
+            Pair<String, String>[] data = dataRetriever.getDataArray();
             this.checkPlaceData(data);
             return data;
         } catch (IOException e) {
@@ -109,6 +114,10 @@ class Main {
         System.out.println(infoStr);
 
 
-        model.getWeatherData(placeName);
+        try {
+            model.getWeatherData(placeName);
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
     }
 }
