@@ -21,13 +21,17 @@ public class Model {
     public SAXParser saxParser;
     WeatherHandler weatherHandler;
     public PlacesHandler placesHandler;
-    private File placesFile;
+    private File placesFile, weatherFile;
 
 
     public Model() throws ParserConfigurationException, SAXException, IOException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
+
+        fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "skelleftea_2242_2018_09_15.xml";
+        this.weatherFile = new File(fPath);
+
 
         parserFactory = SAXParserFactory.newInstance();
 
@@ -39,7 +43,8 @@ public class Model {
     public void getWeatherData(String placeName) {
         try {
             this.getPlaceData(placeName);
-        } catch (SAXException e) {
+            this.saxParser.parse(this.weatherFile, this.weatherHandler);
+        } catch (SAXException | IOException e) {
             e.printStackTrace();
         }
     }

@@ -27,7 +27,7 @@ public class PlacesHandler extends DefaultHandler {
             throws XMLDataRetrievedException, PlaceDataException {
         if (placeNameFound) {
             if (attributes.getLength() != 3) { // If place data longer than 3.
-                incorrectDataError();
+                this.incorrectDataError();
             }
             for (int i = 0; i < 3; i++) {
                 placeData[i] = new Pair<>(attributes.getQName(i), attributes.getValue(i));
