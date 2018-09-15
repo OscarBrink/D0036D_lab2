@@ -43,6 +43,7 @@ public class Model {
     public void getWeatherData(String placeName) {
         try {
             this.getPlaceData(placeName);
+            this.weatherHandler.setlookupTime("23:59:59");
             this.saxParser.parse(this.weatherFile, this.weatherHandler);
         } catch (SAXException | IOException e) {
             e.printStackTrace();
