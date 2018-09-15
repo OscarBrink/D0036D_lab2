@@ -1,9 +1,10 @@
 package model;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import javafx.util.Pair;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -14,9 +15,10 @@ import java.io.IOException;
 
 public class Model {
     
-    static SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+    static SAXParserFactory parserFactory;
 
     public SAXParser saxParser;
+    WeatherHandler weatherHandler;
     public PlacesHandler placesHandler;
     private File placesFile;
 
@@ -26,29 +28,54 @@ public class Model {
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
 
+        parserFactory = SAXParserFactory.newInstance();
+
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
+        this.weatherHandler = new WeatherHandler();
     }
 
     public void getWeatherData(String placeName) {
-        this.getPlaceData(placeName);
+        try {
+            this.getPlaceData(placeName);
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
      * This structure might appear weird, since data is retrieved through the
      * catch clause. This is to avoid
      */
-    private Pair[] getPlaceData(String placeName) {
+    private Pair<String, String>[] getPlaceData(String placeName) throws SAXException {
         this.placesHandler.setPlaceName(placeName);
         try {
             this.saxParser.parse(this.placesFile, this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
-            return dataRetriever.getData();
-        } catch (SAXException | IOException e) {
+            Pair<String, String>[] data = dataRetriever.getData();
+            this.checkPlaceData(data);
+            return data;
+        } catch (IOException e) {
             // TODO auto exception
             e.printStackTrace();
         }
-        throw new ;
+        throw new SAXException();
+    }
+
+    private void checkPlaceData(Pair<String, String>[] data) {
+        for (Pair<String, String> p: data) {
+            if (p.getKey().equals("altitude")
+                    || p.getKey().equals("latitude")
+                    || p.getKey().equals("longitude")) {
+                try {
+                    Float.valueOf(p.getValue());
+                } catch (NumberFormatException e) {
+
+                }
+            } else {
+                throw
+            }
+        }
     }
 
 }

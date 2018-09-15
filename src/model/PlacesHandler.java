@@ -27,19 +27,17 @@ public class PlacesHandler extends DefaultHandler {
                              String qName, Attributes attributes)
             throws XMLDataRetrievedException, PlaceDataException {
         if (placeNameFound) {
-            String infoStr = "";
             if (attributes.getLength() != 3) { // If place data longer than 3.
                 incorrectDataError();
             }
             for (int i = 0; i < 3; i++) {
                 placeData[i] = new Pair<>(attributes.getQName(i), attributes.getValue(i));
-                infoStr += attributes.getQName(i) + " " + attributes.getValue(i) + " ";
             }
             this.resetState();
             throw new XMLDataRetrievedException(placeData);
 
         } else {
-            placeNameFound = this.placeName.equals(attributes.getValue(0));
+            placeNameFound = this.placeName.equals(attributes.getValue("name"));
         }
     }
 

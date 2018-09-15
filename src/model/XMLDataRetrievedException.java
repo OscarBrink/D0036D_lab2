@@ -1,7 +1,6 @@
 package model;
 
 import javafx.util.Pair;
-import org.xml.sax.SAXException;
 
 /**
  * This Exception can be thrown to terminate parsing when the desired
@@ -12,22 +11,22 @@ import org.xml.sax.SAXException;
  */
 class XMLDataRetrievedException extends RuntimeException {
 
-    private Pair[] data;
+    private Pair<String, String>[] data;
 
-    XMLDataRetrievedException(Pair[] data) {
+    XMLDataRetrievedException(Pair<String, String>[] data) {
         super();
         this.data = data;
 
         // Testing
         System.out.println("In Exc: ");
-        for (Pair p : data) {
+        for (Pair<String, String> p : data) {
             System.out.println(p.getKey() +
                     " " + p.getValue()
             );
         }
     }
 
-    Pair[] getData() {
+    Pair<String, String>[] getData() {
         return data;
     }
 }
