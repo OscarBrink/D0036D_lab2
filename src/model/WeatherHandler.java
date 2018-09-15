@@ -8,25 +8,32 @@ public class WeatherHandler extends DefaultHandler {
 
     private String lookupTime;
 
-    boolean timeFound = false,
-            temperatureFound = false;
+    boolean timeFound = false;
 
     private Pair<String, String> weatherData;
+
+    @Override
+    public void endDocument() throws WeatherDataException {
+        String message;
+        if (this.timeFound) {
+            message = "Could not lookup specified time "
+                    + lookupTime + ".";
+        } else {
+            message = "Could not lookup temperature at time "
+                    + lookupTime + ".";
+        }
+
+        throw new WeatherDataException(message);
+    }
 
     @Override
     public void startElement(String uri, String localName,
                              String qName, Attributes attributes) {
 
         if ("time".equals(qName)) {
-
-            //Testing
-            String t2 = attributes.getValue("from").replaceAll(".*T|Z", "");
-
             if (lookupTime.equals(attributes.getValue("from").replaceAll(".*T|Z", ""))) {
                 this.timeFound = true;
             }
-            attributes.getValue("from");
-            //System.out.println(attributes.getValue("from") + " " + attributes.getValue(0));
         } else if (timeFound && "temperature".equals(qName)) {
             weatherData = new Pair<>("temperature", attributes.getValue("value"));
             this.endParse();
@@ -40,7 +47,6 @@ public class WeatherHandler extends DefaultHandler {
 
     private void resetState() {
         this.timeFound = false;
-        this.temperatureFound = false;
     }
 
     private void validateLookupTime(String time) {

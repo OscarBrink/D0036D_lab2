@@ -7,7 +7,7 @@ import javafx.util.Pair;
  * data from an .xml-file has been retrieved.
  *
  * @author  Oscar Brink
- *          2018-09-15
+ *          2018-09-16
  */
 class XMLDataRetrievedException extends RuntimeException {
 
@@ -17,7 +17,7 @@ class XMLDataRetrievedException extends RuntimeException {
     /**
      * Constructor.
      *
-     * @param data Key-value pair-array from .xml-files
+     * @param dataArray Key-value pair-array from .xml-files
      *             (attribute - value pair).
      */
     XMLDataRetrievedException(Pair<String, String>[] dataArray) {
@@ -47,7 +47,7 @@ class XMLDataRetrievedException extends RuntimeException {
 
     /**
      *
-     * @return data key-value pair array retrieved from .xml-file
+     * @return dataArray key-value pair array retrieved from .xml-file
      */
     Pair<String, String>[] getDataArray() {
         return this.dataArray;
