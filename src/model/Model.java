@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +21,12 @@ public class Model {
     
     static SAXParserFactory parserFactory;
 
-    public SAXParser saxParser;
-    WeatherHandler weatherHandler;
-    public PlacesHandler placesHandler;
+    private SAXParser saxParser;
+    private WeatherHandler weatherHandler;
+    private PlacesHandler placesHandler;
     private File placesFile, weatherFile;
+
+    private HTTPRequester httpRequester;
 
 
     public Model() throws ParserConfigurationException, SAXException, IOException {
@@ -40,62 +43,39 @@ public class Model {
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
         this.weatherHandler = new WeatherHandler();
+        this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
     }
 
-    public HashMap<String, String> getWeatherData(String placeName) throws SAXException {
-        this.getPlaceData(placeName);
-        this.weatherHandler.setDateTime("2018-09-17", "20");
+    public HashMap<String, String> getWeatherData(String placeName)
+            throws SAXException, IOException {
+        //this.httpRequester.request(this.getPlaceData(placeName));
+        this.weatherHandler.setDateTime("2018-09-16", "22");
         this.weatherHandler.resetCachingMode();
-
         try {
-            this.saxParser.parse(this.weatherFile, this.weatherHandler);
+            this.saxParser.parse(this.httpRequester.request(this.getPlaceData(placeName)), this.weatherHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
             HashMap<String, String> data = dataRetriever.getData();
             return data;
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         throw new SAXException();
     }
 
-    /*
-     * This structure might appear weird, since data is retrieved through the
-     * catch clause. This is to avoid parsing the entire XML-file after the
-     * desired data has been retrieved. See PlacesHandler.java for impl.
-     */
-    private HashMap<String, String> getPlaceData(String placeName) throws SAXException {
+
+    private HashMap<String, String> getPlaceData(String placeName)
+            throws SAXException, IOException {
         this.placesHandler.setPlaceName(placeName);
+
+        /*
+         * This structure might appear weird, since data is retrieved through
+         * the catch clause. This is to avoid parsing the entire XML-file after
+         * the desired data has been retrieved. See PlacesHandler.java for impl.
+         */
         try {
             this.saxParser.parse(this.placesFile, this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
-            HashMap<String, String> data = dataRetriever.getData();
-            this.checkPlaceData(data);
-            return data;
-        } catch (IOException e) {
-            // TODO auto exception
-            e.printStackTrace();
+            return dataRetriever.getData();
         }
         throw new SAXException();
-    }
-
-    private void checkPlaceData(HashMap<String, String> data)
-            throws PlaceDataException {
-        for (HashMap.Entry<String, String> entry : data.entrySet()) {
-            if (entry.getKey().equals("altitude")
-                    || entry.getKey().equals("latitude")
-                    || entry.getKey().equals("longitude")) {
-                try {
-                    Float.valueOf(entry.getValue());
-                } catch (NumberFormatException e) {
-                    String message = "Value of " + entry.getKey() + " is NaN.";
-                    throw new PlaceDataException(message);
-                }
-            } else {
-                String message = "Unknown parameter name \"" +
-                        entry.getKey() + "\".";
-                throw new PlaceDataException(message);
-            }
-        }
     }
 
 }
@@ -119,7 +99,7 @@ class Main {
 
         try {
             model.getWeatherData(placeName);
-        } catch (SAXException e) {
+        } catch (SAXException | IOException e) {
             e.printStackTrace();
         }
     }

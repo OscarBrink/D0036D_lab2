@@ -39,6 +39,7 @@ public class PlacesHandler extends ApplicationDataHandler {
             for (int i = 0; i < 3; i++) {
                 placeData.put(attributes.getQName(i), attributes.getValue(i));
             }
+            this.checkPlaceData();
             this.endParse();
 
         } else {
@@ -64,6 +65,31 @@ public class PlacesHandler extends ApplicationDataHandler {
         this.placeNameFound = false;
     }
 
+    private void checkPlaceData()
+            throws PlaceDataException {
+        for (HashMap.Entry<String, String> entry : this.placeData.entrySet()) {
+            if (entry.getKey().equals("altitude")
+                    || entry.getKey().equals("latitude")
+                    || entry.getKey().equals("longitude")) {
+                try {
+                    Float.valueOf(entry.getValue());
+                } catch (NumberFormatException e) {
+                    String message = "Value of " + entry.getKey() + " is NaN.";
+                    throw new PlaceDataException(message);
+                }
+            } else {
+                String message = "Unknown parameter name \"" +
+                        entry.getKey() + "\".";
+                throw new PlaceDataException(message);
+            }
+        }
+    }
+
+    /**
+     * Sets the place name to lookup in the places-file.
+     *
+     * @param placeName Place to lookup.
+     */
     void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
