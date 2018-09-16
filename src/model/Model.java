@@ -4,14 +4,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import javafx.util.Pair;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
 
 // Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
@@ -25,6 +22,8 @@ public class Model {
     private WeatherHandler weatherHandler;
     private PlacesHandler placesHandler;
     private File placesFile, weatherFile;
+
+    private HashMap<String, Long> cacheLeases;
 
     private HTTPRequester httpRequester;
 
@@ -43,7 +42,27 @@ public class Model {
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
         this.weatherHandler = new WeatherHandler();
-        this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
+        this.httpRequester = new HTTPRequester(
+                "https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude",
+                System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml"
+        );
+    }
+
+    private boolean checkCacheLease(String placeName) {
+        for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
+            if (entry.getKey().equals(placeName)) {
+                // Return false if lease-time has passed.
+                return ((entry.getValue() - (System.currentTimeMillis() / 1000)) <= 0);
+            }
+        }
+        return false;
+    }
+
+    private void setCacheLease(String placeName, Long leaseSeconds) {
+        this.cacheLeases.put(
+                placeName,
+                (System.currentTimeMillis() / 1000) + leaseSeconds
+        );
     }
 
     public HashMap<String, String> getWeatherData(String placeName)
@@ -51,11 +70,19 @@ public class Model {
         //this.httpRequester.request(this.getPlaceData(placeName));
         this.weatherHandler.setDateTime("2018-09-16", "22");
         this.weatherHandler.resetCachingMode();
-        try {
-            this.saxParser.parse(this.httpRequester.request(this.getPlaceData(placeName)), this.weatherHandler);
-        } catch (XMLDataRetrievedException dataRetriever) {
-            HashMap<String, String> data = dataRetriever.getData();
-            return data;
+
+        if (checkCacheLease(placeName)) {
+            try {
+                this.saxParser.parse(
+                        this.httpRequester.request(this.getPlaceData(placeName)),
+                        this.weatherHandler
+                );
+            } catch (XMLDataRetrievedException dataRetriever) {
+                HashMap<String, String> data = dataRetriever.getData();
+                return data;
+            }
+        } else {
+            // TODO Parse data from cache.
         }
         throw new SAXException();
     }

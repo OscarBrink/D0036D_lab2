@@ -1,47 +1,45 @@
 package model;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 
+/**
+ *
+ * @author  Oscar Brink
+ *          2018-09-16
+ */
 class HTTPRequester {
 
     private String apiURLString;
-    private URL requestURL;
+    private File tempXMLFile;
 
-    HTTPRequester(String apiURLString) {
+    HTTPRequester(String apiURLString, String tempXMLFilePath) {
         this.apiURLString = apiURLString;
+        this.tempXMLFile = new File(tempXMLFilePath);
     }
 
-    InputStream request(HashMap<String,String> locationData) throws IOException {
+    File request(HashMap<String,String> locationData) throws IOException {
         String requestURLString = apiURLString;
         for (HashMap.Entry<String, String> entry : locationData.entrySet()) {
             requestURLString = requestURLString.replaceFirst(entry.getKey(), entry.getValue());
         }
 
+        this.copyToTempXML(new URL(requestURLString));
+
         System.out.println("URL: " + requestURLString);
 
-        // testing
-        String sep = File.separator;
-        String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "skelleftea_2242_2018_09_15.xml";
-        File inF = new File(fPath);
+        return this.tempXMLFile;
+    }
 
-        fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
-        File outF = new File(fPath);
-
-        InputStream targetStream = new FileInputStream(inF);
-
-        Files.copy(targetStream, outF.toPath());
-
-        //new URL(requestURLString).getContent();
-        InputStream newStream = new FileInputStream(outF);
-
-        return newStream;
+    private void copyToTempXML(URL requestURL) throws IOException {
+        Files.copy(
+                requestURL.openStream(),
+                this.tempXMLFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        );
     }
 
 }

@@ -1,8 +1,6 @@
 package model;
 
-import javafx.util.Pair;
 import org.xml.sax.Attributes;
-
 import java.util.HashMap;
 
 /**
@@ -14,7 +12,8 @@ import java.util.HashMap;
  */
 public class WeatherHandler extends ApplicationDataHandler {
 
-    private String lookupTime, lookupDate;
+    private String  lookupTime, lookupDate,
+                    elementTime, elementDate;
 
     private boolean dateTimeFound = false,
                     caching;
@@ -22,19 +21,33 @@ public class WeatherHandler extends ApplicationDataHandler {
     private HashMap<String, String> weatherData;
 
     /**
+     * This method is called when the parser opens the .xml-file.
+     */
+    @Override
+    public void startDocument() {
+        if (caching) {
+            weatherData = new HashMap<String, String>();
+        }
+    }
+
+    /**
      * This method is called when the parser has reached the end of the
      * .xml-file without having found the desired data. It then gives an error.
+     *
+     * Or if in caching mode, this signals that all data has been retrieved.
      *
      * @throws WeatherDataException
      *
      * @see org.xml.sax.helpers.DefaultHandler#endDocument
      */
     @Override
-    public void endDocument() throws WeatherDataException {
+    public void endDocument() throws WeatherDataException, XMLDataRetrievedException {
         this.resetState();
 
         // If not caching data, eof is only reached through lookup failure.
-        if (!this.caching) {
+        if (this.caching) {
+            endParse();
+        } else {
             String message;
             if (this.dateTimeFound) {
                 message = "Could not lookup specified date-time D: "
@@ -67,6 +80,18 @@ public class WeatherHandler extends ApplicationDataHandler {
                              String qName, Attributes attributes)
             throws XMLDataRetrievedException, WeatherDataException {
 
+        if (this.caching) {
+            lookForAllData(qName, attributes);
+        } else {
+            lookForSpecificData(qName, attributes);
+        }
+    }
+
+    /*
+     * Splitting
+     */
+    private void lookForSpecificData(String qName, Attributes attributes)
+            throws WeatherDataException, XMLDataRetrievedException {
         if ("time".equals(qName)) {
             String date = attributes.getValue("to").replaceAll("T.*Z", "");
             String time = attributes.getValue("to").replaceAll(".*T|Z", "");
@@ -79,10 +104,24 @@ public class WeatherHandler extends ApplicationDataHandler {
             if (temperature == null) {
                 this.incorrectDataError();
             }
+
             weatherData = new HashMap<String, String>(2, 1);
             weatherData.put("temperature", attributes.getValue("value"));
-
             this.endParse();
+        }
+    }
+
+    private void lookForAllData(String qName, Attributes attributes)
+            throws WeatherDataException {
+        if ("time".equals(qName)) {
+            this.elementDate = attributes.getValue("to").replaceAll("T.*Z", "");
+            this.elementTime = attributes.getValue("to").replaceAll(".*T|Z", "");
+        } else if ("temperature".equals(qName)) {
+            String temperature = attributes.getValue("value");
+            if (temperature == null) {
+                this.incorrectDataError();
+            }
+            weatherData.put("D" + elementDate + "T" + elementTime, attributes.getValue("value"));
         }
     }
 
@@ -102,7 +141,9 @@ public class WeatherHandler extends ApplicationDataHandler {
     @Override
     void endParse() throws XMLDataRetrievedException {
         this.resetState();
-        throw new XMLDataRetrievedException(this.weatherData);
+        HashMap<String, String> tempWeatherData = this.weatherData;
+        this.weatherData = null;
+        throw new XMLDataRetrievedException(tempWeatherData);
     }
 
     @Override
