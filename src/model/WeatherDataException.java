@@ -10,7 +10,7 @@ import org.xml.sax.SAXException;
  * @author  Oscar Brink
  *          2018-09-16
  */
-public class WeatherDataException extends SAXException {
+public class WeatherDataException extends ApplicationDataException {
 
     /**
      * Constructor.

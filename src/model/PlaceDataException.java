@@ -10,7 +10,7 @@ import org.xml.sax.SAXException;
  * @author  Oscar Brink
  *          2018-09-16
  */
-public class PlaceDataException extends SAXException {
+public class PlaceDataException extends ApplicationDataException {
 
     /**
      * Constructor.

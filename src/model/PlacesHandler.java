@@ -6,8 +6,11 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Handler used for parsing .xml-file containing data about a location.
+ *
+ * @author  Oscar Brink
+ *          2018-09-16
  */
-public class PlacesHandler extends DefaultHandler {
+public class PlacesHandler extends ApplicationDataHandler {
     
     private String placeName;
     private boolean placeNameFound;
@@ -41,18 +44,19 @@ public class PlacesHandler extends DefaultHandler {
         }
     }
 
-    private void endParse() throws XMLDataRetrievedException {
+    @Override
+    void endParse() throws XMLDataRetrievedException {
         this.resetState();
         throw new XMLDataRetrievedException(this.placeData);
     }
 
-    private void incorrectDataError() throws PlaceDataException {
+    void incorrectDataError() throws PlaceDataException {
         String message = "Recieved incorrect place-data. Probably" +
                 " incorrectly formatted places.xml.";
         throw new PlaceDataException(message);
     }
 
-    private void resetState() {
+    void resetState() {
         this.placeNameFound = false;
     }
 

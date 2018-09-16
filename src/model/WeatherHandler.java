@@ -11,7 +11,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author  Oscar Brink
  *          2018-09-16
  */
-public class WeatherHandler extends DefaultHandler {
+public class WeatherHandler extends ApplicationDataHandler {
 
     private String lookupTime, lookupDate;
 
@@ -79,7 +79,7 @@ public class WeatherHandler extends DefaultHandler {
         }
     }
 
-    private void incorrectDataError() throws WeatherDataException {
+    void incorrectDataError() throws WeatherDataException {
         String message = "Failed to retrieve weather data from file.";
         throw new WeatherDataException(message);
     }
@@ -91,12 +91,12 @@ public class WeatherHandler extends DefaultHandler {
         }
     }
 
-    private void endParse() throws XMLDataRetrievedException {
+    void endParse() throws XMLDataRetrievedException {
         this.resetState();
         throw new XMLDataRetrievedException(this.weatherData);
     }
 
-    private void resetState() {
+    void resetState() {
         this.dateTimeFound = false;
     }
 
