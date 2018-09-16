@@ -2,7 +2,6 @@ package model;
 
 import javafx.util.Pair;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Handler used for parsing of weather .xml-files retrieved through
@@ -79,6 +78,7 @@ public class WeatherHandler extends ApplicationDataHandler {
         }
     }
 
+    @Override
     void incorrectDataError() throws WeatherDataException {
         String message = "Failed to retrieve weather data from file.";
         throw new WeatherDataException(message);
@@ -91,11 +91,13 @@ public class WeatherHandler extends ApplicationDataHandler {
         }
     }
 
+    @Override
     void endParse() throws XMLDataRetrievedException {
         this.resetState();
         throw new XMLDataRetrievedException(this.weatherData);
     }
 
+    @Override
     void resetState() {
         this.dateTimeFound = false;
     }

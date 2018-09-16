@@ -1,7 +1,5 @@
 package model;
 
-import org.xml.sax.SAXException;
-
 /**
  * This exception is linked to the class PlacesHandler which is a handler for
  * xml-parsing. The exception exists for certain exceptional conditions during

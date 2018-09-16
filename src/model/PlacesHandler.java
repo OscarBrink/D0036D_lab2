@@ -2,7 +2,6 @@ package model;
 
 import javafx.util.Pair;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Handler used for parsing .xml-file containing data about a location.
@@ -50,12 +49,14 @@ public class PlacesHandler extends ApplicationDataHandler {
         throw new XMLDataRetrievedException(this.placeData);
     }
 
+    @Override
     void incorrectDataError() throws PlaceDataException {
         String message = "Recieved incorrect place-data. Probably" +
                 " incorrectly formatted places.xml.";
         throw new PlaceDataException(message);
     }
 
+    @Override
     void resetState() {
         this.placeNameFound = false;
     }

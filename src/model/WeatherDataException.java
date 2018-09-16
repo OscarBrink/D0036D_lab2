@@ -1,7 +1,5 @@
 package model;
 
-import org.xml.sax.SAXException;
-
 /**
  * This exception is linked to the class WeatherHandler which is a handler for
  * xml-parsing. The exception exists for certain exceptional conditions during
