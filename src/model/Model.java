@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import view.View;
+
 // Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
 // WIN  : String fPath = System.getProperty("user.dir") + "\\testfiles\\places.xml";
@@ -183,14 +185,15 @@ class Main {
         String infoStr = "Getting data for " + placeName;
         System.out.println(infoStr);
 
+        View view = new View();
 
-        try {
-            System.out.println("1: ");
-            model.getWeatherData(placeName);
-            System.out.println("2: ");
-            model.getWeatherData(placeName);
-        } catch (SAXException | IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            System.out.println("1: ");
+//            model.getWeatherData(placeName);
+//            System.out.println("2: ");
+//            model.getWeatherData(placeName);
+//        } catch (SAXException | IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }
