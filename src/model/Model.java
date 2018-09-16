@@ -23,6 +23,8 @@ public class Model {
     private PlacesHandler placesHandler;
     private File placesFile, weatherFile;
 
+    private long leaseTime = 1200;
+
     private HashMap<String, Long> cacheLeases;
 
     private HTTPRequester httpRequester;
@@ -36,8 +38,7 @@ public class Model {
         fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "skelleftea_2242_2018_09_15.xml";
         this.weatherFile = new File(fPath);
 
-
-        parserFactory = SAXParserFactory.newInstance();
+        this.parserFactory = SAXParserFactory.newInstance();
 
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
@@ -58,11 +59,20 @@ public class Model {
         return false;
     }
 
-    private void setCacheLease(String placeName, Long leaseSeconds) {
+    private void setCacheLease(String placeName) {
         this.cacheLeases.put(
                 placeName,
-                (System.currentTimeMillis() / 1000) + leaseSeconds
+                (System.currentTimeMillis() / 1000) + this.leaseTime
         );
+    }
+
+    public void setLeaseTime(long leaseTime) {
+        if (leaseTime >= 600) {
+            this.leaseTime = leaseTime;
+        } else {
+            String message = "Lease time must be at least 10 minutes.";
+            throw new IllegalArgumentException(message);
+        }
     }
 
     public HashMap<String, String> getWeatherData(String placeName)
