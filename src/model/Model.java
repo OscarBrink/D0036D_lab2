@@ -9,6 +9,8 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 // Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
@@ -40,14 +42,15 @@ public class Model {
         this.weatherHandler = new WeatherHandler();
     }
 
-    public Pair<String, String> getWeatherData(String placeName) throws SAXException {
+    public HashMap<String, String> getWeatherData(String placeName) throws SAXException {
         this.getPlaceData(placeName);
-        this.weatherHandler.setDateTime("2018-09-16", "01");
+        this.weatherHandler.setDateTime("2018-09-17", "20");
+        this.weatherHandler.resetCachingMode();
 
         try {
             this.saxParser.parse(this.weatherFile, this.weatherHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
-            Pair<String, String> data = dataRetriever.getData();
+            HashMap<String, String> data = dataRetriever.getData();
             return data;
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,12 +63,12 @@ public class Model {
      * catch clause. This is to avoid parsing the entire XML-file after the
      * desired data has been retrieved. See PlacesHandler.java for impl.
      */
-    private Pair<String, String>[] getPlaceData(String placeName) throws SAXException {
+    private HashMap<String, String> getPlaceData(String placeName) throws SAXException {
         this.placesHandler.setPlaceName(placeName);
         try {
             this.saxParser.parse(this.placesFile, this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
-            Pair<String, String>[] data = dataRetriever.getDataArray();
+            HashMap<String, String> data = dataRetriever.getData();
             this.checkPlaceData(data);
             return data;
         } catch (IOException e) {
@@ -75,21 +78,21 @@ public class Model {
         throw new SAXException();
     }
 
-    private void checkPlaceData(Pair<String, String>[] data)
+    private void checkPlaceData(HashMap<String, String> data)
             throws PlaceDataException {
-        for (Pair<String, String> p: data) {
-            if (p.getKey().equals("altitude")
-                    || p.getKey().equals("latitude")
-                    || p.getKey().equals("longitude")) {
+        for (HashMap.Entry<String, String> entry : data.entrySet()) {
+            if (entry.getKey().equals("altitude")
+                    || entry.getKey().equals("latitude")
+                    || entry.getKey().equals("longitude")) {
                 try {
-                    Float.valueOf(p.getValue());
+                    Float.valueOf(entry.getValue());
                 } catch (NumberFormatException e) {
-                    String message = "Value of " + p.getKey() + " is NaN.";
+                    String message = "Value of " + entry.getKey() + " is NaN.";
                     throw new PlaceDataException(message);
                 }
             } else {
                 String message = "Unknown parameter name \"" +
-                        p.getKey() + "\".";
+                        entry.getKey() + "\".";
                 throw new PlaceDataException(message);
             }
         }

@@ -1,7 +1,8 @@
 package model;
 
-import javafx.util.Pair;
 import org.xml.sax.SAXException;
+
+import java.util.HashMap;
 
 /**
  * This Exception can be thrown to terminate parsing when the desired
@@ -12,53 +13,28 @@ import org.xml.sax.SAXException;
  */
 class XMLDataRetrievedException extends SAXException {
 
-    private Pair<String, String>[] dataArray;
-    private Pair<String, String> data;
+    private HashMap<String, String> data;
 
     /**
      * Constructor.
      *
-     * @param dataArray Key-value pair-array from .xml-files
+     * @param data HashMap with key-value data from .xml-files
      *             (attribute - value pair).
      */
-    XMLDataRetrievedException(Pair<String, String>[] dataArray) {
+    XMLDataRetrievedException(HashMap<String, String> data) {
         super();
-        this.dataArray = dataArray;
-
+        this.data = data;
         // Testing
         System.out.println("In Exc: ");
-        for (Pair<String, String> p : this.dataArray) {
-            System.out.println(p.getKey() + " " + p.getValue());
+        for (HashMap.Entry<String, String> entry : this.data.entrySet()) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
         }
     }
 
     /**
-     * Constructor.
-     *
-     * @param data Key-value pair from .xml-files (attribute - value pair).
-     */
-    XMLDataRetrievedException(Pair<String, String> data) {
-        super();
-        this.data = data;
-
-        // Testing
-        System.out.println("In Exc: ");
-        System.out.println(this.data.getKey() + " " + this.data.getValue());
-    }
-
-    /**
-     *
      * @return dataArray key-value pair array retrieved from .xml-file
      */
-    Pair<String, String>[] getDataArray() {
-        return this.dataArray;
-    }
-
-    /**
-     *
-     * @return data key-value pair array retrieved from .xml-file
-     */
-    Pair<String, String> getData() {
+    HashMap<String, String> getData() {
         return this.data;
     }
 }

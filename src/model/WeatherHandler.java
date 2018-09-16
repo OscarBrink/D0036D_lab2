@@ -3,6 +3,8 @@ package model;
 import javafx.util.Pair;
 import org.xml.sax.Attributes;
 
+import java.util.HashMap;
+
 /**
  * Handler used for parsing of weather .xml-files retrieved through
  * https://api.met.no.
@@ -14,9 +16,10 @@ public class WeatherHandler extends ApplicationDataHandler {
 
     private String lookupTime, lookupDate;
 
-    private boolean dateTimeFound = false;
+    private boolean dateTimeFound = false,
+                    caching;
 
-    private Pair<String, String> weatherData;
+    private HashMap<String, String> weatherData;
 
     /**
      * This method is called when the parser has reached the end of the
@@ -30,16 +33,19 @@ public class WeatherHandler extends ApplicationDataHandler {
     public void endDocument() throws WeatherDataException {
         this.resetState();
 
-        String message;
-        if (this.dateTimeFound) {
-            message = "Could not lookup specified date-time D: "
-                    + lookupDate + " T: " + lookupTime + ".";
-        } else {
-            message = "Could not lookup temperature at date-time D: "
-                    + lookupDate + " T: " + lookupTime + ".";
-        }
+        // If not caching data, eof is only reached through lookup failure.
+        if (!this.caching) {
+            String message;
+            if (this.dateTimeFound) {
+                message = "Could not lookup specified date-time D: "
+                        + lookupDate + " T: " + lookupTime + ".";
+            } else {
+                message = "Could not lookup temperature at date-time D: "
+                        + lookupDate + " T: " + lookupTime + ".";
+            }
 
-        throw new WeatherDataException(message);
+            throw new WeatherDataException(message);
+        }
     }
 
     /**
@@ -73,7 +79,9 @@ public class WeatherHandler extends ApplicationDataHandler {
             if (temperature == null) {
                 this.incorrectDataError();
             }
-            weatherData = new Pair<>("temperature", attributes.getValue("value"));
+            weatherData = new HashMap<String, String>(2, 1);
+            weatherData.put("temperature", attributes.getValue("value"));
+
             this.endParse();
         }
     }
@@ -141,4 +149,22 @@ public class WeatherHandler extends ApplicationDataHandler {
         this.validateLookupDate(date);
         this.lookupDate = date;
     }
+
+    /**
+     * Turns on caching mode which means that the data from the next xml-parsing
+     * will be cached.
+     */
+    void setCachingMode() {
+        this.caching = true;
+    }
+
+    /**
+     * Turns on caching mode which means that the data from the next xml-parsing
+     * will be cached.
+     */
+    void resetCachingMode() {
+        this.caching = false;
+    }
+
+
 }

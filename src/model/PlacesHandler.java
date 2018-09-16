@@ -3,6 +3,8 @@ package model;
 import javafx.util.Pair;
 import org.xml.sax.Attributes;
 
+import java.util.HashMap;
+
 /**
  * Handler used for parsing .xml-file containing data about a location.
  *
@@ -15,7 +17,7 @@ public class PlacesHandler extends ApplicationDataHandler {
     private boolean placeNameFound;
 
     // place data-length always 3.
-    private Pair<String, String>[] placeData = new Pair[3];
+    private HashMap<String, String> placeData;
 
 
     @Override
@@ -33,8 +35,9 @@ public class PlacesHandler extends ApplicationDataHandler {
             if (attributes.getLength() != 3) { // If place data longer than 3.
                 this.incorrectDataError();
             }
+            this.placeData = new HashMap<>(4, 1);
             for (int i = 0; i < 3; i++) {
-                placeData[i] = new Pair<>(attributes.getQName(i), attributes.getValue(i));
+                placeData.put(attributes.getQName(i), attributes.getValue(i));
             }
             this.endParse();
 
