@@ -16,7 +16,7 @@ public class WeatherHandler extends ApplicationDataHandler {
                     elementTime, elementDate;
 
     private boolean dateTimeFound = false,
-                    caching;
+                    caching = false; // Not yet implemented
 
     private HashMap<String, String> weatherData;
 

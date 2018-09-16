@@ -8,7 +8,13 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 // Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
@@ -21,7 +27,10 @@ public class Model {
     private SAXParser saxParser;
     private WeatherHandler weatherHandler;
     private PlacesHandler placesHandler;
-    private File placesFile, weatherFile;
+    private File placesFile;
+
+    private String  tempXMLFilePath,
+                    cacheFilePath;
 
     private long leaseTime = 1200;
 
@@ -30,30 +39,51 @@ public class Model {
     private HTTPRequester httpRequester;
 
 
-    public Model() throws ParserConfigurationException, SAXException, IOException {
+    public Model() throws ParserConfigurationException, SAXException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
-
-        fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "skelleftea_2242_2018_09_15.xml";
-        this.weatherFile = new File(fPath);
 
         this.parserFactory = SAXParserFactory.newInstance();
 
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
         this.weatherHandler = new WeatherHandler();
+
+        this.cacheLeases = new HashMap<String, Long>();
+
+        this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
+        this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
         this.httpRequester = new HTTPRequester(
                 "https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude",
-                System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml"
+                this.tempXMLFilePath
         );
+    }
+
+    public void storeCacheLeases() throws IOException {
+        List<String> textLines = new ArrayList<String>();
+        for (HashMap.Entry<String, Long> entry : cacheLeases.entrySet()) {
+            textLines.add(entry.getKey() + " " + entry.getValue().toString());
+        }
+        Path file = Paths.get(this.cacheFilePath + "cacheLeases.txt");
+        Files.write(file, textLines, Charset.defaultCharset());
+    }
+
+    private void readStoredCacheLeases() throws IOException {
+        for (String line:
+        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.txt"))) {
+            this.cacheLeases.put(
+                    line.replaceAll(" .*", line),
+                    Long.valueOf(line.replaceAll(".* ", line))
+            );
+        }
     }
 
     private boolean checkCacheLease(String placeName) {
         for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
             if (entry.getKey().equals(placeName)) {
                 // Return false if lease-time has passed.
-                return ((entry.getValue() - (System.currentTimeMillis() / 1000)) <= 0);
+                return ((entry.getValue() - (System.currentTimeMillis() / 1000)) > 0);
             }
         }
         return false;
@@ -70,21 +100,31 @@ public class Model {
         if (leaseTime >= 600) {
             this.leaseTime = leaseTime;
         } else {
-            String message = "Lease time must be at least 10 minutes.";
+            String message = "Lease time must be at least 10 minutes (600 s).";
             throw new IllegalArgumentException(message);
         }
+    }
+
+    private void cacheData(String placeName) throws IOException {
+        Files.copy(
+                Paths.get(tempXMLFilePath),
+                Paths.get(cacheFilePath + placeName + ".xml"),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        );
+        this.setCacheLease(placeName);
     }
 
     public HashMap<String, String> getWeatherData(String placeName)
             throws SAXException, IOException {
         //this.httpRequester.request(this.getPlaceData(placeName));
-        this.weatherHandler.setDateTime("2018-09-16", "22");
-        this.weatherHandler.resetCachingMode();
+        this.weatherHandler.setDateTime("2018-09-17", "01");
+        this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
 
         if (checkCacheLease(placeName)) {
+            // this.weatherHandler.resetCachingMode(); caching mode not yet impl.
             try {
                 this.saxParser.parse(
-                        this.httpRequester.request(this.getPlaceData(placeName)),
+                        new File(cacheFilePath + placeName + ".xml"),
                         this.weatherHandler
                 );
             } catch (XMLDataRetrievedException dataRetriever) {
@@ -92,7 +132,17 @@ public class Model {
                 return data;
             }
         } else {
-            // TODO Parse data from cache.
+            // this.weatherHandler.setCachingMode(); caching mode not yet impl.
+            try {
+                this.saxParser.parse(
+                        this.httpRequester.request(this.getPlaceData(placeName)),
+                        this.weatherHandler
+                );
+            } catch (XMLDataRetrievedException dataRetriever) {
+                HashMap<String, String> data = dataRetriever.getData();
+                this.cacheData(placeName);
+                return data;
+            }
         }
         throw new SAXException();
     }
@@ -124,7 +174,7 @@ class Main {
         Model model = null;
         try {
             model = new Model();
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             e.printStackTrace();
         }
 
@@ -135,6 +185,9 @@ class Main {
 
 
         try {
+            System.out.println("1: ");
+            model.getWeatherData(placeName);
+            System.out.println("2: ");
             model.getWeatherData(placeName);
         } catch (SAXException | IOException e) {
             e.printStackTrace();
