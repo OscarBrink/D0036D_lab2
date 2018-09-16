@@ -42,7 +42,7 @@ public class Model {
 
     public Pair<String, String> getWeatherData(String placeName) throws SAXException {
         this.getPlaceData(placeName);
-        this.weatherHandler.setlookupTime("21:00:00");
+        this.weatherHandler.setDateTime("2018-09-16", "01");
 
         try {
             this.saxParser.parse(this.weatherFile, this.weatherHandler);

@@ -4,7 +4,9 @@ import javafx.util.Pair;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
-
+/**
+ * Handler used for parsing .xml-file containing data about a location.
+ */
 public class PlacesHandler extends DefaultHandler {
     
     private String placeName;
@@ -39,7 +41,7 @@ public class PlacesHandler extends DefaultHandler {
         }
     }
 
-    private void endParse() {
+    private void endParse() throws XMLDataRetrievedException {
         this.resetState();
         throw new XMLDataRetrievedException(this.placeData);
     }

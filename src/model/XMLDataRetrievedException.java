@@ -1,6 +1,7 @@
 package model;
 
 import javafx.util.Pair;
+import org.xml.sax.SAXException;
 
 /**
  * This Exception can be thrown to terminate parsing when the desired
@@ -9,7 +10,7 @@ import javafx.util.Pair;
  * @author  Oscar Brink
  *          2018-09-16
  */
-class XMLDataRetrievedException extends RuntimeException {
+class XMLDataRetrievedException extends SAXException {
 
     private Pair<String, String>[] dataArray;
     private Pair<String, String> data;
