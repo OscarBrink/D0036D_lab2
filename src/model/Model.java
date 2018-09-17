@@ -4,11 +4,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import controller.Controller;
 import org.xml.sax.SAXException;
 
+
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,20 +50,21 @@ public class Model {
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
 
-        this.parserFactory = SAXParserFactory.newInstance();
+        parserFactory = SAXParserFactory.newInstance();
 
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
         this.weatherHandler = new WeatherHandler();
 
-        this.cacheLeases = new HashMap<String, Long>();
+        try {
+            this.readStoredCacheLeases();
+        } catch (IOException e) {
+            this.cacheLeases = new HashMap<String, Long>();
+        }
 
         this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
         this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
-        this.httpRequester = new HTTPRequester(
-                "https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude",
-                this.tempXMLFilePath
-        );
+        this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
     }
 
     public void storeCacheLeases() throws IOException {
@@ -68,12 +73,12 @@ public class Model {
             textLines.add(entry.getKey() + " " + entry.getValue().toString());
         }
         Path file = Paths.get(this.cacheFilePath + "cacheLeases.txt");
-        Files.write(file, textLines, Charset.defaultCharset());
+        Files.write(file, textLines, StandardCharsets.UTF_8);
     }
 
     private void readStoredCacheLeases() throws IOException {
         for (String line:
-        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.txt"))) {
+        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.txt"), StandardCharsets.UTF_8)) {
             this.cacheLeases.put(
                     line.replaceAll(" .*", line),
                     Long.valueOf(line.replaceAll(".* ", line))
@@ -116,36 +121,51 @@ public class Model {
         this.setCacheLease(placeName);
     }
 
+    private void copyToCacheXML(String placeName, InputStream requestInput)
+            throws IOException {
+        Files.copy(
+                requestInput,
+                Paths.get(cacheFilePath + placeName + ".xml"),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        );
+    }
+
     public HashMap<String, String> getWeatherData(String placeName)
             throws SAXException, IOException {
-        //this.httpRequester.request(this.getPlaceData(placeName));
-        this.weatherHandler.setDateTime("2018-09-17", "01");
+
+        this.weatherHandler.setDateTime("2018-09-17", "14");
         this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
 
-        if (checkCacheLease(placeName)) {
-            // this.weatherHandler.resetCachingMode(); caching mode not yet impl.
-            try {
-                this.saxParser.parse(
-                        new File(cacheFilePath + placeName + ".xml"),
-                        this.weatherHandler
-                );
-            } catch (XMLDataRetrievedException dataRetriever) {
-                HashMap<String, String> data = dataRetriever.getData();
-                return data;
-            }
-        } else {
-            // this.weatherHandler.setCachingMode(); caching mode not yet impl.
-            try {
-                this.saxParser.parse(
-                        this.httpRequester.request(this.getPlaceData(placeName)),
-                        this.weatherHandler
-                );
-            } catch (XMLDataRetrievedException dataRetriever) {
-                HashMap<String, String> data = dataRetriever.getData();
-                this.cacheData(placeName);
-                return data;
-            }
+        if (!checkCacheLease(placeName)) {
+            this.copyToCacheXML(placeName, this.httpRequester.request(this.getPlaceData(placeName)));
         }
+
+        try {
+            this.saxParser.parse(
+                    new File(cacheFilePath + placeName + ".xml"),
+                    this.weatherHandler
+            );
+        } catch (XMLDataRetrievedException dataRetriever) {
+            HashMap<String, String> data = dataRetriever.getData();
+            return data;
+        }
+
+//        if (checkCacheLease(placeName)) {
+//            // this.weatherHandler.resetCachingMode(); caching mode not yet impl.
+//
+//        } else {
+//            // this.weatherHandler.setCachingMode(); caching mode not yet impl.
+//            try {
+//                this.saxParser.parse(
+//                        this.httpRequester.request(this.getPlaceData(placeName)),
+//                        this.weatherHandler
+//                );
+//            } catch (XMLDataRetrievedException dataRetriever) {
+//                HashMap<String, String> data = dataRetriever.getData();
+//                this.cacheData(placeName);
+//                return data;
+//            }
+//        }
         throw new SAXException();
     }
 
@@ -180,12 +200,16 @@ class Main {
             e.printStackTrace();
         }
 
+        Controller controller = new Controller(model);
+
         String placeName = "Skelleftea";
 
         String infoStr = "Getting data for " + placeName;
         System.out.println(infoStr);
 
-        View view = new View();
+        EventQueue.invokeLater(() -> {
+            View view = new View(controller);
+        });
 
 //        try {
 //            System.out.println("1: ");
