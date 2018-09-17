@@ -104,12 +104,13 @@ public class View extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 View.this.updatePlaceTime();
-
-                View.this.controller.request(
-                        placeNameField.getText(),
-                        dateInputField.getText(),
-                        timeInputField.getText()
-                );
+                try {
+                    View.this.controller.request(
+                            placeNameField.getText(),
+                            dateInputField.getText(),
+                            timeInputField.getText()
+                    );
+                } catch (IllegalArgumentException ex) {}
             }
         });
 
@@ -155,7 +156,7 @@ public class View extends JFrame {
         this.placeLabel.setText(newString);
     }
 
-    private void updateTemperature(String value) {
+    public void updateTemperature(String value) {
         this.tempLabel.setText(value + "\u00b0C");
     }
 

@@ -47,7 +47,7 @@ public class Model {
     private HTTPRequester httpRequester;
 
 
-    public Model(View view) throws ParserConfigurationException, SAXException {
+    public Model() throws ParserConfigurationException, SAXException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
@@ -67,6 +67,10 @@ public class Model {
         this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
         this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
         this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
+    }
+
+    public void setView(View view) {
+        this.view = view;
     }
 
     public void storeCacheLeases() throws IOException {
@@ -137,9 +141,9 @@ public class Model {
 
         this.weatherHandler.setDateTime(date, time);
         this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
-        getWeatherData(placeName).get("temperature");
 
-        this.view
+
+        this.view.updateTemperature(getWeatherData(placeName).get("temperature"));
     }
 
     private HashMap<String, String> getWeatherData(String placeName)
@@ -159,6 +163,7 @@ public class Model {
             );
         } catch (XMLDataRetrievedException dataRetriever) {
             HashMap<String, String> data = dataRetriever.getData();
+            System.out.println(data);
             return data;
         }
 
@@ -203,16 +208,20 @@ public class Model {
 
 
 class Main {
+
+    private static Model model;
+    private static Controller controller;
+    private static View view;
+
     public static void main(String[] args) {
         //System.out.println("fPath: " + fPath);
-        Model model = null;
         try {
             model = new Model();
         } catch (ParserConfigurationException | SAXException e) {
             e.printStackTrace();
         }
 
-        Controller controller = new Controller(model);
+        controller = new Controller(model);
 
         String placeName = "Skelleftea";
 
@@ -220,8 +229,9 @@ class Main {
         System.out.println(infoStr);
 
         EventQueue.invokeLater(() -> {
-            View view = new View(controller);
+            view = new View(controller);
         });
+        model.setView(view);
 
 //        try {
 //            System.out.println("1: ");
