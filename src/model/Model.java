@@ -228,6 +228,7 @@ class Main {
         System.out.println(infoStr);
 
         view = new View(controller);
+        view = new View(controller);
         model.setView(view);
 
 //        try {
