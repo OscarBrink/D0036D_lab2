@@ -1,6 +1,5 @@
 package model;
 
-import javafx.util.Pair;
 import org.xml.sax.Attributes;
 
 import java.util.HashMap;
