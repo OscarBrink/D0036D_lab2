@@ -28,7 +28,9 @@ import view.View;
 
 public class Model {
     
-    static SAXParserFactory parserFactory;
+    private static SAXParserFactory parserFactory;
+
+    private View view;
 
     private SAXParser saxParser;
     private WeatherHandler weatherHandler;
@@ -45,7 +47,7 @@ public class Model {
     private HTTPRequester httpRequester;
 
 
-    public Model() throws ParserConfigurationException, SAXException {
+    public Model(View view) throws ParserConfigurationException, SAXException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
         this.placesFile = new File(fPath);
@@ -130,14 +132,24 @@ public class Model {
         );
     }
 
-    public HashMap<String, String> getWeatherData(String placeName)
+    public void request(String placeName, String date, String time)
+            throws IOException, SAXException {
+
+        this.weatherHandler.setDateTime(date, time);
+        this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
+        getWeatherData(placeName).get("temperature");
+
+        this.view
+    }
+
+    private HashMap<String, String> getWeatherData(String placeName)
             throws SAXException, IOException {
 
-        this.weatherHandler.setDateTime("2018-09-17", "14");
-        this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
-
         if (!checkCacheLease(placeName)) {
-            this.copyToCacheXML(placeName, this.httpRequester.request(this.getPlaceData(placeName)));
+            this.copyToCacheXML(
+                    placeName,
+                    this.httpRequester.request(this.getPlaceData(placeName))
+            );
         }
 
         try {

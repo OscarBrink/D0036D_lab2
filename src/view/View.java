@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class View extends JFrame {
     private JButton cacheButton;
-    private JLabel tempLabel;
+    private JLabel tempLabel, placeLabel;
 
 
     private Controller controller;
@@ -27,7 +27,8 @@ public class View extends JFrame {
 
     private void startGUI() {
 
-        addTemperatureText();
+        addTemperatureLabel();
+        addPlaceLabel();
         createMenu();
         createCacheMenu();
 
@@ -59,7 +60,7 @@ public class View extends JFrame {
         this.add(cacheMenu, BorderLayout.EAST);
     }
 
-    private void addTemperatureText() {
+    private void addTemperatureLabel() {
         tempLabel = new JLabel("XX.X\u00b0C", JLabel.CENTER);
         tempLabel.setFont(new Font(
                 tempLabel.getFont().getName(),
@@ -68,6 +69,17 @@ public class View extends JFrame {
         ));
 
         this.add(tempLabel, BorderLayout.CENTER);
+    }
+
+    private void addPlaceLabel() {
+        placeLabel = new JLabel("<html>Location:<br/>Time:</html>", JLabel.LEFT);
+        placeLabel.setFont(new Font(
+                placeLabel.getFont().getName(),
+                placeLabel.getFont().getStyle(),
+                20
+        ));
+
+        this.add(placeLabel, BorderLayout.NORTH);
     }
 
     private void addPlaceNameField() {
@@ -91,9 +103,13 @@ public class View extends JFrame {
         this.requestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String date = dateInputField.getText();
-                String time = timeInputField.getText();
-                System.out.println(date + " " + time);
+                View.this.updatePlaceTime();
+
+                View.this.controller.request(
+                        placeNameField.getText(),
+                        dateInputField.getText(),
+                        timeInputField.getText()
+                );
             }
         });
 
@@ -106,9 +122,7 @@ public class View extends JFrame {
         this.cacheButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String  message = "Enter new cache-time (min):",
-                        temp;
-                Long cacheTime;
+                String  message = "Enter new cache-time (min):";
                 boolean success = false;
                 while(!success) {
                     try {
@@ -132,6 +146,17 @@ public class View extends JFrame {
         });
 
         cacheMenu.add(cacheButton);
+    }
+
+    private void updatePlaceTime() {
+        String newString = "<html>Location: " + this.placeNameField.getText() +
+                "<br/>Time: " + this.dateInputField.getText() + ":" +
+                this.timeInputField.getText() + "</html>";
+        this.placeLabel.setText(newString);
+    }
+
+    private void updateTemperature(String value) {
+        this.tempLabel.setText(value + "\u00b0C");
     }
 
 
