@@ -40,7 +40,7 @@ public class Model {
     private String  tempXMLFilePath,
                     cacheFilePath;
 
-    private long leaseTime = 1200;
+    private long leaseTime = 1200; // default caching-lease = 20 min
 
     private HashMap<String, Long> cacheLeases;
 
@@ -94,6 +94,7 @@ public class Model {
 
     private boolean checkCacheLease(String placeName) {
         for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
+            System.out.println(entry);
             if (entry.getKey().equals(placeName)) {
                 // Return false if lease-time has passed.
                 return ((entry.getValue() - (System.currentTimeMillis() / 1000)) > 0);
@@ -136,6 +137,16 @@ public class Model {
         );
     }
 
+    /**
+     * Takes a request from controller and gets the data either from cache or
+     * from the met.no API.
+     *
+     * @param placeName The name of the place to get weather data from.
+     * @param date The date to get weather data for.
+     * @param time The time to get weather data for.
+     * @throws IOException
+     * @throws SAXException
+     */
     public void request(String placeName, String date, String time)
             throws IOException, SAXException {
 
@@ -153,6 +164,7 @@ public class Model {
                     placeName,
                     this.httpRequester.request(this.getPlaceData(placeName))
             );
+            this.setCacheLease(placeName);
         }
 
         try {
@@ -227,7 +239,6 @@ class Main {
         String infoStr = "Getting data for " + placeName;
         System.out.println(infoStr);
 
-        view = new View(controller);
         view = new View(controller);
         model.setView(view);
 
