@@ -149,6 +149,9 @@ public class View extends JFrame {
         cacheMenu.add(cacheButton);
     }
 
+    /*
+     * Text can be displayed with linebreak if wrapped in html-tags.
+     */
     private void updatePlaceTime() {
         String newString = "<html>Location: " + this.placeNameField.getText() +
                 "<br/>Time: " + this.dateInputField.getText() + ":" +
@@ -159,7 +162,5 @@ public class View extends JFrame {
     public void updateTemperature(String value) {
         this.tempLabel.setText(value + "\u00b0C");
     }
-
-
 
 }
