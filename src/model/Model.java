@@ -26,6 +26,13 @@ import view.View;
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
 // WIN  : String fPath = System.getProperty("user.dir") + "\\testfiles\\places.xml";
 
+/**
+ * Central class of the data model.
+ * 
+ * @author  Oscar Brink
+ *          2018-10-09
+ *
+ */
 public class Model {
     
     private static SAXParserFactory parserFactory;
@@ -47,6 +54,9 @@ public class Model {
     private HTTPRequester httpRequester;
 
 
+    /**
+     * Constructor.
+     */
     public Model() throws ParserConfigurationException, SAXException {
         String sep = File.separator;
         String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
@@ -69,6 +79,11 @@ public class Model {
         this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
     }
 
+    /**
+     * Set the view that the data model pushes to.
+     *
+     * @param view View that the data model pushes info to.
+     */
     public void setView(View view) {
         this.view = view;
     }
@@ -110,6 +125,13 @@ public class Model {
         );
     }
 
+
+    /**
+     * Sets the time until cached weather data retrieved from the api has 
+     * expired. After this time the application will get data from the api.
+     *
+     * @param leaseTime Data expiration time in seconds.
+     */
     public void setLeaseTime(long leaseTime) {
         if (leaseTime >= 600) {
             this.leaseTime = leaseTime;
@@ -141,7 +163,8 @@ public class Model {
      * Takes a request from controller and gets the data either from cache or
      * from the met.no API.
      *
-     * @param placeName The name of the place to get weather data from.
+     * @param placeName The name of the place to get weather data from. This
+     *                  has to be specified in the file places.xml
      * @param date The date to get weather data for.
      * @param time The time to get weather data for.
      * @throws IOException
@@ -216,3 +239,4 @@ public class Model {
     }
 
 }
+

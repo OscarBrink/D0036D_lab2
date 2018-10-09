@@ -29,7 +29,8 @@ public abstract class ApplicationDataHandler extends DefaultHandler {
      * an XMLDataRetrievedException containing key-value pair data which can be
      * caught in the parent to the parser.
      *
-     * @throws XMLDataRetrievedException
+     * @throws XMLDataRetrievedException Thrown when the desired data has been
+     *                                   retrieved
      */
     void endParse() throws XMLDataRetrievedException {}
 }
