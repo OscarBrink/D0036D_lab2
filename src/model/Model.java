@@ -53,6 +53,8 @@ public class Model {
 
     private HTTPRequester httpRequester;
 
+    private XMLWriter xmlWriter;
+
 
     /**
      * Constructor.
@@ -77,6 +79,8 @@ public class Model {
         this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
         this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
         this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
+
+        this.xmlWriter = new XMLWriter(cacheFilePath);
     }
 
     /**
@@ -107,11 +111,13 @@ public class Model {
         }
     }
 
+    /*
+     * Checks if lease-time has passed. Returns false if it has.
+     */
     private boolean checkCacheLease(String placeName) {
         for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
             System.out.println(entry);
             if (entry.getKey().equals(placeName)) {
-                // Return false if lease-time has passed.
                 return ((entry.getValue() - (System.currentTimeMillis() / 1000)) > 0);
             }
         }
@@ -135,6 +141,7 @@ public class Model {
     public void setLeaseTime(long leaseTime) {
         if (leaseTime >= 600) {
             this.leaseTime = leaseTime;
+            this.xmlWriter.setLeaseTime(leaseTime);
         } else {
             String message = "Lease time must be at least 10 minutes (600 s).";
             throw new IllegalArgumentException(message);

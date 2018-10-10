@@ -175,10 +175,10 @@ public class WeatherHandler extends ApplicationDataHandler {
      */
     void setDateTime(String date, String time) {
         this.setLookupDate(date);
-        this.setlookupTime(time);
+        this.setLookupTime(time);
     }
 
-    private void setlookupTime(String time) {
+    private void setLookupTime(String time) {
         if (time.length() == 1) {
             time = "0" + time;
         }
@@ -193,15 +193,15 @@ public class WeatherHandler extends ApplicationDataHandler {
 
     /**
      * Turns on caching mode which means that the data from the next xml-parsing
-     * will be cached.
+     * will be cached and not retrieved.
      */
     void setCachingMode() {
         this.caching = true;
     }
 
     /**
-     * Turns on caching mode which means that the data from the next xml-parsing
-     * will be cached.
+     * Turns off caching mode which means that the data from the next
+     * xml-parsing will be retrieved and not cached.
      */
     void resetCachingMode() {
         this.caching = false;
