@@ -124,11 +124,14 @@ public class Model {
         return false;
     }
 
-    private void setCacheLease(String placeName) {
-        this.cacheLeases.put(
-                placeName,
-                (System.currentTimeMillis() / 1000) + this.leaseTime
-        );
+    /*
+     * Called when new data has been retrieved from API, sets a new
+     * cache-lease for the place.
+     */
+    private long setCacheLease(String placeName) {
+        long cacheLeaseTime = (System.currentTimeMillis() / 1000) + this.leaseTime;
+        this.cacheLeases.put(placeName, cacheLeaseTime);
+        return cacheLeaseTime;
     }
 
 
@@ -149,12 +152,13 @@ public class Model {
     }
 
     private void cacheData(String placeName) throws IOException {
+        this.setCacheLease(placeName); // TODO Here is the cache thing
+
         Files.copy(
                 Paths.get(tempXMLFilePath),
                 Paths.get(cacheFilePath + placeName + ".xml"),
                 java.nio.file.StandardCopyOption.REPLACE_EXISTING
         );
-        this.setCacheLease(placeName);
     }
 
     private void copyToCacheXML(String placeName, InputStream requestInput)
@@ -194,7 +198,7 @@ public class Model {
                     placeName,
                     this.httpRequester.request(this.getPlaceData(placeName))
             );
-            this.setCacheLease(placeName);
+            this.setCacheLease(placeName); // TODO Remove
         }
 
         try {
