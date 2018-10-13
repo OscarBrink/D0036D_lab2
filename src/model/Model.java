@@ -93,17 +93,29 @@ public class Model {
     }
 
     public void storeCacheLeases() throws IOException {
+        HashMap<String, Long> activeLeases = new HashMap<String, Long>();
+
+        for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
+            if ((entry.getValue() - (System.currentTimeMillis() / 1000)) > 0) {
+                activeLeases.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        this.xmlWriter.storeCacheLeases(activeLeases);
+
+/*
         List<String> textLines = new ArrayList<String>();
         for (HashMap.Entry<String, Long> entry : cacheLeases.entrySet()) {
             textLines.add(entry.getKey() + " " + entry.getValue().toString());
         }
         Path file = Paths.get(this.cacheFilePath + "cacheLeases.txt");
         Files.write(file, textLines, StandardCharsets.UTF_8);
+*/
     }
 
     private void readStoredCacheLeases() throws IOException {
         for (String line:
-        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.txt"), StandardCharsets.UTF_8)) {
+        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.xml"), StandardCharsets.UTF_8)) {
             this.cacheLeases.put(
                     line.replaceAll(" .*", line),
                     Long.valueOf(line.replaceAll(".* ", line))
@@ -128,6 +140,7 @@ public class Model {
      * Called when new data has been retrieved from API, sets a new
      * cache-lease for the place.
      */
+
     private long setCacheLease(String placeName) {
         long cacheLeaseTime = (System.currentTimeMillis() / 1000) + this.leaseTime;
         this.cacheLeases.put(placeName, cacheLeaseTime);
