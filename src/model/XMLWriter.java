@@ -118,6 +118,13 @@ public class XMLWriter {
         }
     }
 
+    /*
+     * The method sets up the cacheLease-file.
+     * The structure is:
+     * <cacheleases>
+     *     <locality name="nnnnnn" lease="xxxxxxxxxx"/>
+     * </cachedata>
+     */
     private Document setupLeaseDocument(HashMap<String, Long> data) {
         Document xmlDocument = xmlBuilder.newDocument();
 
@@ -141,10 +148,6 @@ public class XMLWriter {
         }
 
         return xmlDocument;
-    }
-
-    private void writeToXML() {
-
     }
 
     public void setLeaseTime(long leaseTime) {

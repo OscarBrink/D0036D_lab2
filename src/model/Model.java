@@ -76,6 +76,16 @@ public class Model {
             this.cacheLeases = new HashMap<String, Long>();
         }
 
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Model.this.storeCacheLeases();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        }));
+
         this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
         this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
         this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
