@@ -1,26 +1,15 @@
 package model;
 
+import org.xml.sax.SAXException;
+import view.View;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import controller.Controller;
-import org.xml.sax.SAXException;
-
-
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import view.View;
 
 // Testing
 // UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
@@ -43,9 +32,9 @@ public class Model {
     private PlacesHandler placesHandler;
     private LeaseHandler leaseHandler;
     private WeatherHandler weatherHandler;
-    private File placesFile;
 
-    private String  tempXMLFilePath,
+    private String  applicationDirPath,
+                    placesFilePath,
                     cacheFilePath;
 
     private long leaseTime = 1200; // default caching-lease = 20 min
@@ -62,8 +51,6 @@ public class Model {
      */
     public Model() throws ParserConfigurationException, SAXException {
         String sep = File.separator;
-        String fPath = System.getProperty("user.dir") + sep + "testfiles" + sep + "places.xml";
-        this.placesFile = new File(fPath);
 
         parserFactory = SAXParserFactory.newInstance();
 
@@ -72,8 +59,15 @@ public class Model {
         this.leaseHandler = new LeaseHandler();
         this.weatherHandler = new WeatherHandler();
 
-        this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
-        this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
+
+        // Main path where application data will be cached.
+        this.applicationDirPath = System.getProperty("user.home") + sep + ".weatherAppBrink";
+        new File(this.applicationDirPath + sep + "cache").mkdirs();
+
+        // this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
+        this.cacheFilePath = this.applicationDirPath + sep + "cache";
+        this.placesFilePath = this.applicationDirPath + sep + "places.xml";
+
         this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
 
         this.xmlWriter = new XMLWriter(cacheFilePath);
@@ -199,15 +193,6 @@ public class Model {
         this.weatherHandler.resetCachingMode();
     }
 
-    private void copyToCacheXML(String placeName, InputStream requestInput)
-            throws IOException {
-        Files.copy(
-                requestInput,
-                Paths.get(cacheFilePath + placeName + ".xml"),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING
-        );
-    }
-
     /**
      * Takes a request from controller and gets the data either from cache or
      * from the met.no API.
@@ -279,7 +264,7 @@ public class Model {
          * the desired data has been retrieved. See PlacesHandler.java for impl.
          */
         try {
-            this.saxParser.parse(this.placesFile, this.placesHandler);
+            this.saxParser.parse(new File(placesFilePath), this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
             return dataRetriever.getData();
         }
