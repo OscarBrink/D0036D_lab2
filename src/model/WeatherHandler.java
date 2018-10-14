@@ -114,14 +114,16 @@ public class WeatherHandler extends ApplicationDataHandler {
     private void lookForAllData(String qName, Attributes attributes)
             throws WeatherDataException {
         if ("time".equals(qName)) {
-            this.elementDate = attributes.getValue("to").replaceAll("D|T.*Z?", "");
-            this.elementTime = attributes.getValue("to").replaceAll(".*T|Z", "");
+            this.elementDate = attributes.getValue("to");
+
+            //this.elementDate = attributes.getValue("to").replaceAll("D|T.*Z?", "");
+            //this.elementTime = attributes.getValue("to").replaceAll(".*T|Z", "");
         } else if ("temperature".equals(qName)) {
             String temperature = attributes.getValue("value");
             if (temperature == null) {
                 this.incorrectDataError();
             }
-            weatherData.put("D" + elementDate + "T" + elementTime, attributes.getValue("value"));
+            weatherData.put(this.elementDate, attributes.getValue("value"));
         }
     }
 

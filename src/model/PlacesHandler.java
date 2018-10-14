@@ -15,7 +15,6 @@ public class PlacesHandler extends ApplicationDataHandler {
     private String placeName;
     private boolean placeNameFound;
 
-    // place data-length always 3.
     private HashMap<String, String> placeData;
 
 
@@ -34,6 +33,8 @@ public class PlacesHandler extends ApplicationDataHandler {
             if (attributes.getLength() != 3) { // If place data longer than 3.
                 this.incorrectDataError();
             }
+
+            // place data-length always 3
             this.placeData = new HashMap<>(4, 1);
             for (int i = 0; i < 3; i++) {
                 placeData.put(attributes.getQName(i), attributes.getValue(i));
@@ -49,7 +50,9 @@ public class PlacesHandler extends ApplicationDataHandler {
     @Override
     void endParse() throws XMLDataRetrievedException {
         this.resetState();
-        throw new XMLDataRetrievedException(this.placeData);
+        HashMap<String, String> tempPlaceData = this.placeData;
+        this.placeData = null;
+        throw new XMLDataRetrievedException(tempPlaceData);
     }
 
     @Override

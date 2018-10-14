@@ -40,8 +40,9 @@ public class Model {
     private View view;
 
     private SAXParser saxParser;
-    private WeatherHandler weatherHandler;
     private PlacesHandler placesHandler;
+    private LeaseHandler leaseHandler;
+    private WeatherHandler weatherHandler;
     private File placesFile;
 
     private String  tempXMLFilePath,
@@ -68,11 +69,19 @@ public class Model {
 
         this.saxParser = parserFactory.newSAXParser();
         this.placesHandler = new PlacesHandler();
+        this.leaseHandler = new LeaseHandler();
         this.weatherHandler = new WeatherHandler();
+
+        this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
+        this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
+        this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
+
+        this.xmlWriter = new XMLWriter(cacheFilePath);
 
         try {
             this.readStoredCacheLeases();
         } catch (IOException e) {
+            System.out.println("1");
             this.cacheLeases = new HashMap<String, Long>();
         }
 
@@ -85,12 +94,6 @@ public class Model {
                 }
             }
         }));
-
-        this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
-        this.cacheFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "cache" + sep;
-        this.httpRequester = new HTTPRequester("https://api.met.no/weatherapi/locationforecast/1.9/?lat=latitude&lon=longitude&msl=altitude");
-
-        this.xmlWriter = new XMLWriter(cacheFilePath);
     }
 
     /**
@@ -123,13 +126,20 @@ public class Model {
 */
     }
 
-    private void readStoredCacheLeases() throws IOException {
-        for (String line:
-        Files.readAllLines(Paths.get(this.cacheFilePath + "cacheLeases.xml"), StandardCharsets.UTF_8)) {
-            this.cacheLeases.put(
-                    line.replaceAll(" .*", line),
-                    Long.valueOf(line.replaceAll(".* ", line))
+    private void readStoredCacheLeases() throws IOException, SAXException {
+        try {
+            saxParser.parse(
+                    new File(this.cacheFilePath + "cacheLeases.xml"),
+                    this.leaseHandler
             );
+        } catch (XMLDataRetrievedException dataRetriever) {
+            HashMap<String, Long> cacheLeases = new HashMap<String, Long>();
+            for (HashMap.Entry<String, String> entry : dataRetriever.getData().entrySet()) {
+                cacheLeases.put(entry.getKey(), Long.valueOf(entry.getValue()));
+            }
+
+            this.cacheLeases = cacheLeases;
+            System.out.println(cacheLeases);
         }
     }
 
@@ -174,14 +184,19 @@ public class Model {
         }
     }
 
-    private void cacheData(String placeName) throws IOException {
+    private void cacheData(String placeName, InputStream requestInput)
+            throws IOException, SAXException {
         this.setCacheLease(placeName); // TODO Here is the cache thing
+        this.weatherHandler.setCachingMode();
 
-        Files.copy(
-                Paths.get(tempXMLFilePath),
-                Paths.get(cacheFilePath + placeName + ".xml"),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING
-        );
+        try {
+            this.saxParser.parse(requestInput, this.weatherHandler);
+        } catch (XMLDataRetrievedException dataRetriever) {
+            // Write to cache-file
+            this.xmlWriter.cacheData(placeName, dataRetriever.getData());
+        }
+
+        this.weatherHandler.resetCachingMode();
     }
 
     private void copyToCacheXML(String placeName, InputStream requestInput)
@@ -217,11 +232,10 @@ public class Model {
             throws SAXException, IOException {
 
         if (!checkCacheLease(placeName)) {
-            this.copyToCacheXML(
+            this.cacheData(
                     placeName,
                     this.httpRequester.request(this.getPlaceData(placeName))
             );
-            this.setCacheLease(placeName); // TODO Remove
         }
 
         try {

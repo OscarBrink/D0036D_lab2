@@ -23,6 +23,8 @@ public class Main {
 
         controller = new Controller(model);
 
+        System.out.println(System.getProperty("user.home"));
+
         //String placeName = "Skelleftea";
 
         //String infoStr = "Getting data for " + placeName;
