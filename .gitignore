@@ -2,6 +2,10 @@
 # Reference: 
 https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
+# vim swaps
+.swp*
+.swo*
+
 # Intellij
 .idea/
 *.iml

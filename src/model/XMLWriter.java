@@ -42,6 +42,9 @@ public class XMLWriter {
         this.xmlBuilder = xmlFactory.newDocumentBuilder();
     }
 
+    /**
+     * 
+     */
     public void cacheData(String placeName, HashMap<String, String> data) {
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
