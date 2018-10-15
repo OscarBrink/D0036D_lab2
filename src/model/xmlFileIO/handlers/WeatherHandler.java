@@ -1,5 +1,6 @@
-package model;
+package model.xmlFileIO.handlers;
 
+import model.xmlFileIO.XMLDataRetrievedException;
 import org.xml.sax.Attributes;
 import java.util.HashMap;
 
@@ -183,7 +184,7 @@ public class WeatherHandler extends ApplicationDataHandler {
      * @param date Date to lookup.
      * @param time Time to lookup.
      */
-    void setDateTime(String date, String time) {
+    public void setDateTime(String date, String time) {
         this.setLookupDate(date);
         this.setLookupTime(time);
     }
@@ -211,7 +212,7 @@ public class WeatherHandler extends ApplicationDataHandler {
      * Turns on caching mode which means that the data from the next xml-parsing
      * will be cached and not retrieved.
      */
-    void setCachingMode() {
+    public void setCachingMode() {
         this.caching = true;
     }
 
@@ -219,7 +220,7 @@ public class WeatherHandler extends ApplicationDataHandler {
      * Turns off caching mode which means that the data from the next
      * xml-parsing will be retrieved and not cached.
      */
-    void resetCachingMode() {
+    public void resetCachingMode() {
         this.caching = false;
     }
 }

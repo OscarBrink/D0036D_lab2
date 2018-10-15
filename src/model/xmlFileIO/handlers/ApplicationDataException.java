@@ -1,4 +1,4 @@
-package model;
+package model.xmlFileIO.handlers;
 
 import org.xml.sax.SAXException;
 

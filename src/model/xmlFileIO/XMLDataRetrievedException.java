@@ -1,4 +1,4 @@
-package model;
+package model.xmlFileIO;
 
 import org.xml.sax.SAXException;
 
@@ -11,7 +11,7 @@ import java.util.HashMap;
  * @author  Oscar Brink
  *          2018-09-16
  */
-class XMLDataRetrievedException extends SAXException {
+public class XMLDataRetrievedException extends SAXException {
 
     private HashMap<String, String> data;
 
@@ -29,7 +29,7 @@ class XMLDataRetrievedException extends SAXException {
     /**
      * @return dataArray key-value pair array retrieved from .xml-file
      */
-    HashMap<String, String> getData() {
+    public HashMap<String, String> getData() {
         return this.data;
     }
 }

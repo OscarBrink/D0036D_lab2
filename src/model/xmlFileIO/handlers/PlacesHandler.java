@@ -1,5 +1,6 @@
-package model;
+package model.xmlFileIO.handlers;
 
+import model.xmlFileIO.XMLDataRetrievedException;
 import org.xml.sax.Attributes;
 
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class PlacesHandler extends ApplicationDataHandler {
      *
      * @param placeName Place to lookup.
      */
-    void setPlaceName(String placeName) {
+    public void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
 }

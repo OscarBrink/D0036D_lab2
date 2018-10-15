@@ -1,19 +1,25 @@
 package model;
 
-import org.xml.sax.SAXException;
-import view.View;
+import model.xmlFileIO.XMLDataRetrievedException;
+import model.xmlFileIO.XMLWriter;
+import model.xmlFileIO.handlers.LeaseHandler;
+import model.xmlFileIO.handlers.PlacesHandler;
+import model.xmlFileIO.handlers.WeatherHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+
 import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
-// Testing
-// UNIX : String fPath = System.getProperty("user.dir") + "/../testfiles/places.xml";
-// WIN  : String fPath = System.getProperty("user.dir") + "\\testfiles\\places.xml";
+import view.View;
+
+import java.util.HashMap;
 
 /**
  * Central class of the data model.
@@ -99,6 +105,7 @@ public class Model {
                 try {
                     Model.this.storeCacheLeases();
                 } catch (IOException e) {
+                    // If cache-leases failed to write, do nothing.
                     //e.printStackTrace();
                 }
             }

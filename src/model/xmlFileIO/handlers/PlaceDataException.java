@@ -1,4 +1,4 @@
-package model;
+package model.xmlFileIO.handlers;
 
 /**
  * This exception is linked to the class PlacesHandler which is a handler for

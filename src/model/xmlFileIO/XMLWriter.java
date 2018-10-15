@@ -1,4 +1,4 @@
-package model;
+package model.xmlFileIO;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;

@@ -1,5 +1,6 @@
-package model;
+package model.xmlFileIO.handlers;
 
+import model.xmlFileIO.XMLDataRetrievedException;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
