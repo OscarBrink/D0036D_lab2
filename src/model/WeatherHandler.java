@@ -8,15 +8,16 @@ import java.util.HashMap;
  * https://api.met.no.
  *
  * @author  Oscar Brink
- *          2018-09-16
+ *          2018-10-15
  */
 public class WeatherHandler extends ApplicationDataHandler {
 
-    private String  lookupTime, lookupDate,
-                    elementTime, elementDate;
+    private String  lookupTime,
+                    lookupDate,
+                    currentDateTime;
 
     private boolean dateTimeFound = false,
-                    caching = false; // Not yet implemented
+                    caching = false;
 
     private HashMap<String, String> weatherData;
 
@@ -25,8 +26,8 @@ public class WeatherHandler extends ApplicationDataHandler {
      */
     @Override
     public void startDocument() {
-        if (caching) {
-            weatherData = new HashMap<String, String>();
+        if (this.caching) {
+            this.weatherData = new HashMap<String, String>();
         }
     }
 
@@ -51,10 +52,10 @@ public class WeatherHandler extends ApplicationDataHandler {
             String message;
             if (this.dateTimeFound) {
                 message = "Could not lookup specified date-time D: "
-                        + lookupDate + " T: " + lookupTime + ".";
+                        + this.lookupDate + " T: " + this.lookupTime + ".";
             } else {
                 message = "Could not lookup temperature at date-time D: "
-                        + lookupDate + " T: " + lookupTime + ".";
+                        + this.lookupDate + " T: " + this.lookupTime + ".";
             }
 
             throw new WeatherDataException(message);
@@ -88,7 +89,7 @@ public class WeatherHandler extends ApplicationDataHandler {
     }
 
     /*
-     * Splitting
+     * This method is run to look for weather-data at a specific time.
      */
     private void lookForSpecificData(String qName, Attributes attributes)
             throws WeatherDataException, XMLDataRetrievedException {
@@ -96,34 +97,35 @@ public class WeatherHandler extends ApplicationDataHandler {
             String date = attributes.getValue("to").replaceAll("T.*Z", "");
             String time = attributes.getValue("to").replaceAll(".*T|Z", "");
 
-            if (lookupDate.equals(date) && lookupTime.equals(time)) {
+            if (this.lookupDate.equals(date) && this.lookupTime.equals(time)) {
                 this.dateTimeFound = true;
             }
-        } else if (dateTimeFound && "temperature".equals(qName)) {
+        } else if (this.dateTimeFound && "temperature".equals(qName)) {
             String temperature = attributes.getValue("value");
             if (temperature == null) {
                 this.incorrectDataError();
             }
 
-            weatherData = new HashMap<String, String>(2, 1);
-            weatherData.put("temperature", attributes.getValue("value"));
+            this.weatherData = new HashMap<String, String>(2, 1);
+            this.weatherData.put("temperature", attributes.getValue("value"));
             this.endParse();
         }
     }
 
+    /*
+     * This method is run when caching, and looks for any temperature data
+     * at any time.
+     */
     private void lookForAllData(String qName, Attributes attributes)
             throws WeatherDataException {
         if ("time".equals(qName)) {
-            this.elementDate = attributes.getValue("to");
-
-            //this.elementDate = attributes.getValue("to").replaceAll("D|T.*Z?", "");
-            //this.elementTime = attributes.getValue("to").replaceAll(".*T|Z", "");
+            this.currentDateTime = attributes.getValue("to");
         } else if ("temperature".equals(qName)) {
             String temperature = attributes.getValue("value");
             if (temperature == null) {
                 this.incorrectDataError();
             }
-            weatherData.put(this.elementDate, attributes.getValue("value"));
+            this.weatherData.put(this.currentDateTime, attributes.getValue("value"));
         }
     }
 
@@ -153,6 +155,9 @@ public class WeatherHandler extends ApplicationDataHandler {
         this.dateTimeFound = false;
     }
 
+    /*
+     * Checks that the time recieved as input is valid.
+     */
     private void validateLookupTime(String time) {
         if (!time.matches("[0-1]\\d|2[0-3]")) {
             String message = "Invalid time format for " + time + ". Please " +
@@ -161,6 +166,9 @@ public class WeatherHandler extends ApplicationDataHandler {
         }
     }
 
+    /*
+     * Checks that the date recieved as input is valid.
+     */
     private void validateLookupDate(String date) {
         if (!date.matches("\\d{4}-(0[1-9]|1[0-2])-([0-2]\\d|3[0-1])")) {
             String message = "Invalid date format for " + date + ". The only " +
@@ -180,6 +188,9 @@ public class WeatherHandler extends ApplicationDataHandler {
         this.setLookupTime(time);
     }
 
+    /*
+     * Sets the time to lookup.
+     */
     private void setLookupTime(String time) {
         if (time.length() == 1) {
             time = "0" + time;
@@ -188,6 +199,9 @@ public class WeatherHandler extends ApplicationDataHandler {
         this.lookupTime = time + ":00:00";
     }
 
+    /*
+     * Sets the date to lookup.
+     */
     private void setLookupDate(String date) {
         this.validateLookupDate(date);
         this.lookupDate = date;
@@ -208,6 +222,4 @@ public class WeatherHandler extends ApplicationDataHandler {
     void resetCachingMode() {
         this.caching = false;
     }
-
-
 }

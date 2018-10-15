@@ -6,6 +6,7 @@ import controller.Controller;
 
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Main class of the application. Sets up the MVC-structure and runs the program.
@@ -26,7 +27,8 @@ public class Main {
             e.printStackTrace();
         } catch (IOException e) {
             System.out.println("Could not create application directories");
-            System.exit();
+            e.printStackTrace();
+            System.exit(1); // Exit if dirs could not be created.
         }
 
         controller = new Controller(model);
