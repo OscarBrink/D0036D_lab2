@@ -7,40 +7,32 @@ import controller.Controller;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * Main class of the application. Sets up the MVC-structure and runs the program.
+ */
 public class Main {
 
     private static Model model;
     private static Controller controller;
     private static View view;
 
+    /**
+     * Static standard java method running on startup.
+     */
     public static void main(String[] args) {
-        //System.out.println("fPath: " + fPath);
         try {
             model = new Model();
         } catch (ParserConfigurationException | SAXException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Could not create application directories");
+            System.exit();
         }
 
         controller = new Controller(model);
 
-        System.out.println(System.getProperty("user.home"));
-
-        //String placeName = "Skelleftea";
-
-        //String infoStr = "Getting data for " + placeName;
-        //System.out.println(infoStr);
-
         view = new View(controller);
         model.setView(view);
-
-//        try {
-//            System.out.println("1: ");
-//            model.getWeatherData(placeName);
-//            System.out.println("2: ");
-//            model.getWeatherData(placeName);
-//        } catch (SAXException | IOException e) {
-//            e.printStackTrace();
-//        }
     }
 }
 

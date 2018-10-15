@@ -25,7 +25,6 @@ import java.util.HashMap;
 public class XMLWriter {
 
     String cacheDirPath;
-    long leaseTime;
 
     DocumentBuilderFactory xmlFactory;
     DocumentBuilder xmlBuilder;
@@ -122,7 +121,7 @@ public class XMLWriter {
      * The method sets up the cacheLease-file.
      * The structure is:
      * <cacheleases>
-     *     <locality name="nnnnnn" lease="xxxxxxxxxx"/>
+     *     <locality name="cccccc" lease="xxxxxxxxxx"/>
      * </cachedata>
      */
     private Document setupLeaseDocument(HashMap<String, Long> data) {
@@ -148,10 +147,6 @@ public class XMLWriter {
         }
 
         return xmlDocument;
-    }
-
-    public void setLeaseTime(long leaseTime) {
-        this.leaseTime = leaseTime;
     }
 
     public static void main(String[] args) {

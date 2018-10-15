@@ -19,8 +19,7 @@ import java.util.HashMap;
  * Central class of the data model.
  * 
  * @author  Oscar Brink
- *          2018-10-09
- *
+ *          2018-10-15
  */
 public class Model {
     
@@ -47,24 +46,38 @@ public class Model {
 
 
     /**
-     * Constructor.
+     * Constructor. Sets up entire data-model for usage.
+     *
+     * @throws ParserConfigurationException Thrown if something goes
+     *         wrong when generating parsers.
+     * @throws SAXException Thrown if something goes
+     *         wrong when generating parsers.
+     * @throws IOException Thrown when application could not find or create
+     *         application directories.
      */
-    public Model() throws ParserConfigurationException, SAXException {
-        String sep = File.separator;
-
+    public Model() throws ParserConfigurationException, SAXException, IOException {
+        // Creating parser objects
         parserFactory = SAXParserFactory.newInstance();
-
         this.saxParser = parserFactory.newSAXParser();
+
         this.placesHandler = new PlacesHandler();
         this.leaseHandler = new LeaseHandler();
         this.weatherHandler = new WeatherHandler();
 
+        String sep = File.separator;
 
         // Main path where application data will be cached.
         this.applicationDirPath = System.getProperty("user.home") + sep + ".weatherAppBrink";
-        new File(this.applicationDirPath + sep + "cache").mkdirs();
 
-        // this.tempXMLFilePath = System.getProperty("user.dir") + sep + "testfiles" + sep + "test.xml";
+        // Creating application dir if not yet existing.
+        File applicationDirectory = new File(this.applicationDirPath + sep + "cache");
+        if (!applicationDirectory.isDirectory()) {
+            if (!applicationDirectory.mkdirs()) {
+                throw new IOException();
+            }
+        }
+
+        // Setting path-strings for cache and places-file
         this.cacheFilePath = this.applicationDirPath + sep + "cache";
         this.placesFilePath = this.applicationDirPath + sep + "places.xml";
 
@@ -72,13 +85,15 @@ public class Model {
 
         this.xmlWriter = new XMLWriter(cacheFilePath);
 
+        // Read any cache-leases that might have been stored from previous run of application
+        // Otherwise, initialize empty cache-lease map
         try {
             this.readStoredCacheLeases();
         } catch (IOException e) {
-            System.out.println("1");
             this.cacheLeases = new HashMap<String, Long>();
         }
 
+        // Setup shutdown-hook to store active cache-leases on application shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 try {
@@ -99,7 +114,11 @@ public class Model {
         this.view = view;
     }
 
-    public void storeCacheLeases() throws IOException {
+    /*
+     * Method runs on close of program.
+     * Stores the active cache-leases in the program
+     */
+    private void storeCacheLeases() throws IOException {
         HashMap<String, Long> activeLeases = new HashMap<String, Long>();
 
         for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
@@ -109,17 +128,12 @@ public class Model {
         }
 
         this.xmlWriter.storeCacheLeases(activeLeases);
-
-/*
-        List<String> textLines = new ArrayList<String>();
-        for (HashMap.Entry<String, Long> entry : cacheLeases.entrySet()) {
-            textLines.add(entry.getKey() + " " + entry.getValue().toString());
-        }
-        Path file = Paths.get(this.cacheFilePath + "cacheLeases.txt");
-        Files.write(file, textLines, StandardCharsets.UTF_8);
-*/
     }
 
+    /*
+     * Method tries to read stored cache leases, if they exist.
+     * IOException otherwise
+     */
     private void readStoredCacheLeases() throws IOException, SAXException {
         try {
             saxParser.parse(
@@ -154,7 +168,6 @@ public class Model {
      * Called when new data has been retrieved from API, sets a new
      * cache-lease for the place.
      */
-
     private long setCacheLease(String placeName) {
         long cacheLeaseTime = (System.currentTimeMillis() / 1000) + this.leaseTime;
         this.cacheLeases.put(placeName, cacheLeaseTime);
@@ -178,12 +191,16 @@ public class Model {
         }
     }
 
+    /*
+     * Parses input from the API, and writes retrieved data to cache-file
+     */
     private void cacheData(String placeName, InputStream requestInput)
             throws IOException, SAXException {
-        this.setCacheLease(placeName); // TODO Here is the cache thing
+        this.setCacheLease(placeName);
         this.weatherHandler.setCachingMode();
 
         try {
+            // Parsing input from API
             this.saxParser.parse(requestInput, this.weatherHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
             // Write to cache-file
@@ -201,18 +218,21 @@ public class Model {
      *                  has to be specified in the file places.xml
      * @param date The date to get weather data for.
      * @param time The time to get weather data for.
-     * @throws IOException
-     * @throws SAXException
+     * @throws IOException Thrown from child methods.
+     * @throws SAXException Thrown from child methods.
      */
     public void request(String placeName, String date, String time)
             throws IOException, SAXException {
 
         this.weatherHandler.setDateTime(date, time);
-        this.weatherHandler.resetCachingMode(); // caching mode not yet impl.
 
         this.view.updateTemperature(getWeatherData(placeName).get("temperature"));
     }
 
+    /*
+     * Reads data either from cache or from API.
+     * If from API the data is first cached.
+     */
     private HashMap<String, String> getWeatherData(String placeName)
             throws SAXException, IOException {
 
@@ -234,35 +254,17 @@ public class Model {
             return data;
         }
 
-//        if (checkCacheLease(placeName)) {
-//            // this.weatherHandler.resetCachingMode(); caching mode not yet impl.
-//
-//        } else {
-//            // this.weatherHandler.setCachingMode(); caching mode not yet impl.
-//            try {
-//                this.saxParser.parse(
-//                        this.httpRequester.request(this.getPlaceData(placeName)),
-//                        this.weatherHandler
-//                );
-//            } catch (XMLDataRetrievedException dataRetriever) {
-//                HashMap<String, String> data = dataRetriever.getData();
-//                this.cacheData(placeName);
-//                return data;
-//            }
-//        }
         throw new SAXException();
     }
 
-
+    /*
+     * Retrieves position data of a place from places.xml
+     * Gets longitude, latitude, and altitude
+     */
     private HashMap<String, String> getPlaceData(String placeName)
             throws SAXException, IOException {
         this.placesHandler.setPlaceName(placeName);
 
-        /*
-         * This structure might appear weird, since data is retrieved through
-         * the catch clause. This is to avoid parsing the entire XML-file after
-         * the desired data has been retrieved. See PlacesHandler.java for impl.
-         */
         try {
             this.saxParser.parse(new File(placesFilePath), this.placesHandler);
         } catch (XMLDataRetrievedException dataRetriever) {
