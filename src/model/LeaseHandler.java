@@ -5,6 +5,13 @@ import org.xml.sax.SAXException;
 
 import java.util.HashMap;
 
+/**
+ * Handler used for parsing .xml-file containing data about cache-leases used
+ * in the weather application.
+ *
+ * @author  Oscar Brink
+ *          2018-10-15
+ */
 public class LeaseHandler extends ApplicationDataHandler {
 
     private HashMap<String, String> leaseData;

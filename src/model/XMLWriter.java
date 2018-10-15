@@ -3,6 +3,7 @@ package model;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,6 +13,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.File;
 
 import java.util.HashMap;
@@ -20,14 +22,14 @@ import java.util.HashMap;
 /**
  * Class handles writing to XML-files for the application.
  * @author  Oscar Brink
- *          2018-10-10
+ *          2018-10-15
  */
 public class XMLWriter {
 
-    String cacheDirPath;
+    private String cacheDirPath;
 
-    DocumentBuilderFactory xmlFactory;
-    DocumentBuilder xmlBuilder;
+    private DocumentBuilderFactory xmlFactory;
+    private DocumentBuilder xmlBuilder;
 
     /**
      * Constructor.
@@ -43,7 +45,11 @@ public class XMLWriter {
     }
 
     /**
-     * 
+     * Writes data to the .xml cache-file.
+     *
+     * @param placeName Name of the place that weather-data is for. Also the
+     *                  filename for the .xml-file where data is cached.
+     * @param data  Weather-data to be written to cache-file.
      */
     public void cacheData(String placeName, HashMap<String, String> data) {
 
@@ -57,6 +63,7 @@ public class XMLWriter {
                     new File(this.cacheDirPath + placeName + ".xml")
             );
 
+            // Write to .xml-file
             transformer.transform(domSource, streamResult);
         } catch (TransformerException e) {
             e.printStackTrace();
@@ -103,6 +110,13 @@ public class XMLWriter {
         return xmlDocument;
     }
 
+    /**
+     * Stores the cache-leases for use on next program startup.
+     *
+     * @param data HashMap containing the lease-data.
+     *             Key:     place-name
+     *             Value:   lease-time
+     */
     public void storeCacheLeases(HashMap<String, Long> data) {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         try {
@@ -114,6 +128,7 @@ public class XMLWriter {
                     new File(this.cacheDirPath + "cacheLeases.xml")
             );
 
+            // Write to .xml-file
             transformer.transform(domSource, streamResult);
         } catch (TransformerException e) {
             e.printStackTrace();
@@ -150,32 +165,6 @@ public class XMLWriter {
         }
 
         return xmlDocument;
-    }
-
-    public static void main(String[] args) {
-
-        HashMap<String, String> tstData = new HashMap<>();
-
-        tstData.put("D2018-09-15T20", "3.9");
-        tstData.put("D2018-09-15T21", "3.8");
-        tstData.put("D2018-09-15T22", "3.7");
-        tstData.put("D2018-09-15T25", "2.5");
-
-        // TODO testing for xml-writer
-        try {
-
-            String placeName = "Skelleftea2";
-            String path = System.getProperty("user.dir") + File.separator +
-                    "testfiles" + File.separator + "cache" + File.separator;
-
-            XMLWriter xmlWriter = new XMLWriter(path);
-            xmlWriter.cacheData(placeName, tstData);
-
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-
-
     }
 
 }

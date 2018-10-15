@@ -184,7 +184,6 @@ public class Model {
     public void setLeaseTime(long leaseTime) {
         if (leaseTime >= 600) {
             this.leaseTime = leaseTime;
-            this.xmlWriter.setLeaseTime(leaseTime);
         } else {
             String message = "Lease time must be at least 10 minutes (600 s).";
             throw new IllegalArgumentException(message);
