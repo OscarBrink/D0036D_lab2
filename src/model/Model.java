@@ -147,7 +147,6 @@ public class Model {
             }
 
             this.cacheLeases = cacheLeases;
-            System.out.println(cacheLeases);
         }
     }
 
@@ -156,7 +155,6 @@ public class Model {
      */
     private boolean checkCacheLease(String placeName) {
         for (HashMap.Entry<String, Long> entry : this.cacheLeases.entrySet()) {
-            System.out.println(entry);
             if (entry.getKey().equals(placeName)) {
                 return ((entry.getValue() - (System.currentTimeMillis() / 1000)) > 0);
             }
@@ -185,7 +183,7 @@ public class Model {
         if (leaseTime >= 600) {
             this.leaseTime = leaseTime;
         } else {
-            String message = "Lease time must be at least 10 minutes (600 s).";
+            String message = "Lease time must be at least 10 minutes.";
             throw new IllegalArgumentException(message);
         }
     }
@@ -249,7 +247,6 @@ public class Model {
             );
         } catch (XMLDataRetrievedException dataRetriever) {
             HashMap<String, String> data = dataRetriever.getData();
-            System.out.println(data);
             return data;
         }
 
