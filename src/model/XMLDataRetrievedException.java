@@ -24,11 +24,6 @@ class XMLDataRetrievedException extends SAXException {
     XMLDataRetrievedException(HashMap<String, String> data) {
         super();
         this.data = data;
-        // Testing
-        System.out.println("In Exc: ");
-        for (HashMap.Entry<String, String> entry : this.data.entrySet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue());
-        }
     }
 
     /**

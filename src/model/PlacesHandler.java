@@ -8,7 +8,7 @@ import java.util.HashMap;
  * Handler used for parsing .xml-file containing data about a location.
  *
  * @author  Oscar Brink
- *          2018-09-16
+ *          2018-10-15
  */
 public class PlacesHandler extends ApplicationDataHandler {
     
@@ -36,6 +36,7 @@ public class PlacesHandler extends ApplicationDataHandler {
 
             // place data-length always 3
             this.placeData = new HashMap<>(4, 1);
+
             for (int i = 0; i < 3; i++) {
                 placeData.put(attributes.getQName(i), attributes.getValue(i));
             }
@@ -67,6 +68,10 @@ public class PlacesHandler extends ApplicationDataHandler {
         this.placeNameFound = false;
     }
 
+    /*
+     * Checks that the place-data that has been retrieved is correctly
+     * formatted.
+     */
     private void checkPlaceData()
             throws PlaceDataException {
         for (HashMap.Entry<String, String> entry : this.placeData.entrySet()) {
