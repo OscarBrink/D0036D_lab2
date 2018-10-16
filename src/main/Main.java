@@ -19,6 +19,8 @@ public class Main {
 
     /**
      * Static standard java method running on startup.
+     *
+     * @param args Arguments to main, not used.
      */
     public static void main(String[] args) {
         try {
